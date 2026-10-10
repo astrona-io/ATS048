@@ -1,0 +1,84 @@
+# Preparation scaffold. Technical pages stay draft until authoring and review.
+training:
+  id: ATS048
+  title: 'PCA: Prometheus Fundamentals'
+  description: Preparation scaffold for Prometheus Fundamentals. Lessons and environments are planned.
+  certification:
+    name: Prometheus Certified Associate
+    code: PCA
+    provider: CNCF / Linux Foundation
+    domain: Prometheus Fundamentals
+    weight: 20
+    competencies:
+    - System Architecture
+    - Configuration and Scraping
+    - Understanding Prometheus Limitations
+    - Data Model and Labels
+    - Exposition Format
+modules:
+- id: module-intro
+  title: Introduction
+  description: Planned introduction and authoring status.
+  content:
+  - type: reading
+    title: Introduction
+    path: sections/intro/README.md
+  - type: reading
+    title: Welcome To The Course
+    path: sections/intro/course-01-welcome.md
+  - type: reading
+    title: Get Your Machine Ready
+    path: sections/intro/course-02-get-your-machine-ready.md
+  - type: reading
+    title: How This Course Is Made
+    path: sections/intro/course-03-how-this-course-is-made.md
+- id: module-010
+  title: System Architecture
+  description: Planned coverage of this curriculum objective.
+  content:
+  - type: reading
+    title: Section Overview
+    path: sections/section-010/README.md
+  - type: reading
+    title: System Architecture
+    path: sections/section-010/module-01/course.md
+- id: module-020
+  title: Configuration and Scraping
+  description: Planned coverage of this curriculum objective.
+  content:
+  - type: reading
+    title: Section Overview
+    path: sections/section-020/README.md
+  - type: reading
+    title: Configuration and Scraping
+    path: sections/section-020/module-01/course.md
+- id: module-030
+  title: Understanding Prometheus Limitations
+  description: Planned coverage of this curriculum objective.
+  content:
+  - type: reading
+    title: Section Overview
+    path: sections/section-030/README.md
+  - type: reading
+    title: Understanding Prometheus Limitations
+    path: sections/section-030/module-01/course.md
+- id: module-040
+  title: Data Model and Labels
+  description: Planned coverage of this curriculum objective.
+  content:
+  - type: reading
+    title: Section Overview
+    path: sections/section-040/README.md
+  - type: reading
+    title: Data Model and Labels
+    path: sections/section-040/module-01/course.md
+- id: module-050
+  title: Exposition Format
+  description: Planned coverage of this curriculum objective.
+  content:
+  - type: reading
+    title: Section Overview
+    path: sections/section-050/README.md
+  - type: reading
+    title: Exposition Format
+    path: sections/section-050/module-01/course.md
