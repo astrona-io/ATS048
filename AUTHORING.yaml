@@ -1,0 +1,124 @@
+version: 1
+approval: PCA requested 2026-10-11; established reading-only scope
+course:
+  id: ATS048
+  certification:
+    name: Prometheus Certified Associate
+    code: PCA
+    provider: CNCF / Linux Foundation
+    domain: Prometheus Fundamentals
+    weight: 20
+    competencies:
+    - System Architecture
+    - Configuration and Scraping
+    - Understanding Prometheus Limitations
+    - Data Model and Labels
+    - Exposition Format
+defaults:
+  playground: false
+  module_lab: false
+  capstone: false
+  section_quiz: false
+  final_quiz: true
+assessment_format: YAML question banks v1, registered in assessments/index.yaml
+sections:
+- id: section-010
+  title: System Architecture
+  curriculum_item: System Architecture
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: The Prometheus Collection, Storage And Rule Pipeline
+    objectives:
+    - Trace samples from exposition through scraping and local storage.
+    - Distinguish query, recording-rule and alert-rule responsibilities.
+    - Explain Alertmanager's notification role.
+    - Identify separate failures in collection, processing and remote delivery.
+    outline:
+    - The Prometheus Collection, Storage And Rule Pipeline
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-010/module-01/course-01-the-prometheus-collection-storage-and-rule-pipeline.md
+      adapted_from: null
+- id: section-020
+  title: Configuration and Scraping
+  curriculum_item: Configuration and Scraping
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Scrape Timing, Target Labels And Failure Evidence
+    objectives:
+    - Interpret global defaults and per-job scrape settings.
+    - Distinguish timeout, interval and rule evaluation timing.
+    - Explain job, instance and exporter-label conflicts.
+    - Diagnose a failed scrape without equating it with application downtime.
+    outline:
+    - Scrape Timing, Target Labels And Failure Evidence
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-020/module-01/course-01-scrape-timing-target-labels-and-failure-evidence.md
+      adapted_from: null
+- id: section-030
+  title: Understanding Prometheus Limitations
+  curriculum_item: Understanding Prometheus Limitations
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Prometheus Storage, Scale And Evidence Limits
+    objectives:
+    - Explain scrape gaps and why metrics are not a transaction ledger.
+    - Relate cardinality, retention and query scope to resource cost.
+    - Distinguish local storage from remote storage and replication.
+    - Evaluate monitoring dependencies and failure evidence.
+    outline:
+    - Prometheus Storage, Scale And Evidence Limits
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-030/module-01/course-01-prometheus-storage-scale-and-evidence-limits.md
+      adapted_from: null
+- id: section-040
+  title: Data Model and Labels
+  curriculum_item: Data Model and Labels
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Series Identity, Label Cardinality And Staleness
+    objectives:
+    - Explain how metric names and labels identify a time series.
+    - Distinguish missing labels, empty labels and matcher behavior.
+    - Relate changing labels to churn and historical continuity.
+    - Explain absent samples and staleness without substituting zero automatically.
+    outline:
+    - Series Identity, Label Cardinality And Staleness
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-040/module-01/course-01-series-identity-label-cardinality-and-staleness.md
+      adapted_from: null
+- id: section-050
+  title: Exposition Format
+  curriculum_item: Exposition Format
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Reading Metric Exposition And Format Contracts
+    objectives:
+    - Interpret HELP, TYPE and labeled sample lines.
+    - Explain escaping and consistent metric-family structure.
+    - Distinguish exposition timestamps from metric values.
+    - Compare classic text and negotiated OpenMetrics behavior.
+    outline:
+    - Reading Metric Exposition And Format Contracts
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-050/module-01/course-01-reading-metric-exposition-and-format-contracts.md
+      adapted_from: null

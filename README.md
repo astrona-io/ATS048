@@ -1,18 +1,19 @@
-# ATS048 — PCA: Prometheus Fundamentals
+# Prometheus Fundamentals (ATS048)
 
-Preparation for the **Prometheus Fundamentals** domain of **Prometheus Certified Associate (PCA)**.
-The published domain weight is **20%**. This repository belongs to
-the [ATP010 training path](https://github.com/astrona-io/ATP010).
+Prometheus Certified Associate (PCA): Prometheus Fundamentals, worth 20% of the official curriculum. This course belongs to ATP010.
 
-**Status:** Preparation scaffold; content authoring has not started.
+Developed reading explains mechanisms, responsible components, examples and limits. Every section has an introduction and every module closes with a summary. Reusable YAML checks contain 5–15 questions per bank. Technical content remains draft. No labs or playgrounds are included.
 
-The initial commit reserves the curriculum structure. Lessons, playgrounds,
-labs and assessments are planned and are not ready for learner use.
+## Course Outline
 
-See [CURRICULUM.md](CURRICULUM.md) for the objective map and authoring checklist,
-[astrona.yaml](astrona.yaml) for the course manifest, and
-[CLAUDE.md](CLAUDE.md) for writing and environment rules.
+| Section / module | Module | Teaching files |
+| --- | --- | --- |
+| 010 / 01 | The Prometheus Collection, Storage And Rule Pipeline | The Prometheus Collection, Storage And Rule Pipeline |
+| 020 / 01 | Scrape Timing, Target Labels And Failure Evidence | Scrape Timing, Target Labels And Failure Evidence |
+| 030 / 01 | Prometheus Storage, Scale And Evidence Limits | Prometheus Storage, Scale And Evidence Limits |
+| 040 / 01 | Series Identity, Label Cardinality And Staleness | Series Identity, Label Cardinality And Staleness |
+| 050 / 01 | Reading Metric Exposition And Format Contracts | Reading Metric Exposition And Format Contracts |
 
-Curriculum source: [official PCA page](https://training.linuxfoundation.org/certification/prometheus-certified-associate/), checked 2026-10-10.
-License: [Apache-2.0](LICENSE). Curriculum objectives retain attribution to
-The Linux Foundation and CNCF; see [CNCF curriculum licensing](https://github.com/cncf/curriculum).
+## Author Review
+
+See [curriculum coverage](CURRICULUM.md), [primary sources](SOURCES.md), [question-bank documentation](ASSESSMENTS.md) and [contribution instructions](CONTRIBUTING.md). No runtime execution is claimed.

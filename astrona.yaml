@@ -1,8 +1,9 @@
-# Preparation scaffold. Technical pages stay draft until authoring and review.
+# Reading-only content; YAML knowledge checks have a separate index.
 training:
   id: ATS048
   title: 'PCA: Prometheus Fundamentals'
-  description: Preparation scaffold for Prometheus Fundamentals. Lessons and environments are planned.
+  description: 'Detailed reading material and reusable YAML knowledge checks for PCA: Prometheus Fundamentals.
+    Technical content remains draft. No labs or playgrounds.'
   certification:
     name: Prometheus Certified Associate
     code: PCA
@@ -18,7 +19,7 @@ training:
 modules:
 - id: module-intro
   title: Introduction
-  description: Planned introduction and authoring status.
+  description: Audience, reading method and review process.
   content:
   - type: reading
     title: Introduction
@@ -34,51 +35,86 @@ modules:
     path: sections/intro/course-03-how-this-course-is-made.md
 - id: module-010
   title: System Architecture
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for System Architecture.
+  draft: true
   content:
-  - type: reading
-    title: Section Overview
-    path: sections/section-010/README.md
   - type: reading
     title: System Architecture
+    path: sections/section-010/README.md
+  - type: reading
+    title: The Prometheus Collection, Storage And Rule Pipeline
     path: sections/section-010/module-01/course.md
+  - type: reading
+    title: The Prometheus Collection, Storage And Rule Pipeline
+    path: sections/section-010/module-01/course-01-the-prometheus-collection-storage-and-rule-pipeline.md
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-01/course-02-summary.md
 - id: module-020
   title: Configuration and Scraping
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Configuration and Scraping.
+  draft: true
   content:
-  - type: reading
-    title: Section Overview
-    path: sections/section-020/README.md
   - type: reading
     title: Configuration and Scraping
+    path: sections/section-020/README.md
+  - type: reading
+    title: Scrape Timing, Target Labels And Failure Evidence
     path: sections/section-020/module-01/course.md
+  - type: reading
+    title: Scrape Timing, Target Labels And Failure Evidence
+    path: sections/section-020/module-01/course-01-scrape-timing-target-labels-and-failure-evidence.md
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-01/course-02-summary.md
 - id: module-030
   title: Understanding Prometheus Limitations
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Understanding Prometheus Limitations.
+  draft: true
   content:
-  - type: reading
-    title: Section Overview
-    path: sections/section-030/README.md
   - type: reading
     title: Understanding Prometheus Limitations
+    path: sections/section-030/README.md
+  - type: reading
+    title: Prometheus Storage, Scale And Evidence Limits
     path: sections/section-030/module-01/course.md
+  - type: reading
+    title: Prometheus Storage, Scale And Evidence Limits
+    path: sections/section-030/module-01/course-01-prometheus-storage-scale-and-evidence-limits.md
+  - type: reading
+    title: Summary
+    path: sections/section-030/module-01/course-02-summary.md
 - id: module-040
   title: Data Model and Labels
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Data Model and Labels.
+  draft: true
   content:
-  - type: reading
-    title: Section Overview
-    path: sections/section-040/README.md
   - type: reading
     title: Data Model and Labels
+    path: sections/section-040/README.md
+  - type: reading
+    title: Series Identity, Label Cardinality And Staleness
     path: sections/section-040/module-01/course.md
+  - type: reading
+    title: Series Identity, Label Cardinality And Staleness
+    path: sections/section-040/module-01/course-01-series-identity-label-cardinality-and-staleness.md
+  - type: reading
+    title: Summary
+    path: sections/section-040/module-01/course-02-summary.md
 - id: module-050
   title: Exposition Format
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Exposition Format.
+  draft: true
   content:
   - type: reading
-    title: Section Overview
+    title: Exposition Format
     path: sections/section-050/README.md
   - type: reading
-    title: Exposition Format
+    title: Reading Metric Exposition And Format Contracts
     path: sections/section-050/module-01/course.md
+  - type: reading
+    title: Reading Metric Exposition And Format Contracts
+    path: sections/section-050/module-01/course-01-reading-metric-exposition-and-format-contracts.md
+  - type: reading
+    title: Summary
+    path: sections/section-050/module-01/course-02-summary.md
