@@ -1,0 +1,300 @@
+schema_version: 1
+kind: question_bank
+id: ats048-domain-review
+course_id: ATS048
+exam_code: PCA
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: domain
+  id: domain-review
+  title: Prometheus Fundamentals
+placement:
+  position: after
+  reading: sections/section-050/module-01/course-02-summary.md
+questions:
+- id: ats048-domain-review-q01
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Trace samples from exposition through scraping and local storage.
+  source_readings:
+  - sections/section-010/module-01/course-01-the-prometheus-collection-storage-and-rule-pipeline.md
+  prompt: Which component normally scrapes application metrics?
+  options:
+  - id: a
+    text: Alertmanager.
+    explanation: Alertmanager handles alert delivery rather than application scraping.
+  - id: b
+    text: A dashboard browser automatically.
+    explanation: A dashboard queries a data source rather than owning normal collection.
+  - id: c
+    text: The Prometheus server or compatible collector.
+    explanation: It obtains samples from selected endpoints.
+  correct_option: c
+  explanation: It obtains samples from selected endpoints.
+- id: ats048-domain-review-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish query, recording-rule and alert-rule responsibilities.
+  source_readings:
+  - sections/section-010/module-01/course-01-the-prometheus-collection-storage-and-rule-pipeline.md
+  prompt: What does a recording rule create?
+  options:
+  - id: a
+    text: An application trace span.
+    explanation: Recording rules operate on metric expressions.
+  - id: b
+    text: A named series from a periodically evaluated expression.
+    explanation: It stores useful derived results.
+  - id: c
+    text: A guaranteed notification for every sample.
+    explanation: Notifications require alert rules and downstream routing.
+  correct_option: b
+  explanation: It stores useful derived results.
+- id: ats048-domain-review-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain Alertmanager's notification role.
+  source_readings:
+  - sections/section-010/module-01/course-01-the-prometheus-collection-storage-and-rule-pipeline.md
+  prompt: Where are alert grouping and receiver routing handled?
+  options:
+  - id: a
+    text: Alertmanager.
+    explanation: Those are notification responsibilities.
+  - id: b
+    text: Only inside the instrumented application.
+    explanation: Applications expose observations rather than manage all notification routing.
+  - id: c
+    text: By the local TSDB's file naming scheme.
+    explanation: Storage naming does not define alert recipients.
+  correct_option: a
+  explanation: Those are notification responsibilities.
+- id: ats048-domain-review-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Interpret global defaults and per-job scrape settings.
+  source_readings:
+  - sections/section-020/module-01/course-01-scrape-timing-target-labels-and-failure-evidence.md
+  prompt: What does a per-job scrape interval override?
+  options:
+  - id: a
+    text: Every alert's required firing duration.
+    explanation: Alert duration is a separate rule setting.
+  - id: b
+    text: The application's request timeout automatically.
+    explanation: Application behavior is not changed by scrape scheduling.
+  - id: c
+    text: The applicable collection interval inherited from global configuration.
+    explanation: Job settings can specialize collection timing.
+  correct_option: c
+  explanation: Job settings can specialize collection timing.
+- id: ats048-domain-review-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish timeout, interval and rule evaluation timing.
+  source_readings:
+  - sections/section-020/module-01/course-01-scrape-timing-target-labels-and-failure-evidence.md
+  prompt: What is the difference between interval and timeout?
+  options:
+  - id: a
+    text: Timeout determines how long alerts stay silenced.
+    explanation: Silences belong to Alertmanager configuration.
+  - id: b
+    text: Interval schedules scrapes; timeout bounds a scrape attempt.
+    explanation: They represent different timing responsibilities.
+  - id: c
+    text: Both are names for the same dashboard refresh setting.
+    explanation: Dashboard refresh is separate.
+  correct_option: b
+  explanation: They represent different timing responsibilities.
+- id: ats048-domain-review-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Diagnose a failed scrape without equating it with application downtime.
+  source_readings:
+  - sections/section-020/module-01/course-01-scrape-timing-target-labels-and-failure-evidence.md
+  prompt: A target has up equal to zero. What should be concluded first?
+  options:
+  - id: a
+    text: Its scrape failed.
+    explanation: The cause may be addressing, transport, authentication or parsing.
+  - id: b
+    text: Every customer request definitely failed.
+    explanation: The application can still serve users while metrics collection fails.
+  - id: c
+    text: The target was removed from discovery permanently.
+    explanation: A selected failed target differs from discovery absence.
+  correct_option: a
+  explanation: The cause may be addressing, transport, authentication or parsing.
+- id: ats048-domain-review-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain scrape gaps and why metrics are not a transaction ledger.
+  source_readings:
+  - sections/section-030/module-01/course-01-prometheus-storage-scale-and-evidence-limits.md
+  prompt: Why should scraped counters not serve as an exact billing ledger?
+  options:
+  - id: a
+    text: Counters cannot represent numbers.
+    explanation: They do represent numerical accumulation.
+  - id: b
+    text: Every scrape contains the full original transaction payload.
+    explanation: Exposition contains metric state rather than all event records.
+  - id: c
+    text: Scrape gaps and lifecycle changes can omit event detail.
+    explanation: Operational aggregates do not provide complete transaction evidence.
+  correct_option: c
+  explanation: Operational aggregates do not provide complete transaction evidence.
+- id: ats048-domain-review-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Relate cardinality, retention and query scope to resource cost.
+  source_readings:
+  - sections/section-030/module-01/course-01-prometheus-storage-scale-and-evidence-limits.md
+  prompt: What most directly increases series cardinality?
+  options:
+  - id: a
+    text: Renaming a dashboard panel.
+    explanation: Presentation does not create source series.
+  - id: b
+    text: Additional distinct combinations of metric labels.
+    explanation: Each label set forms another series.
+  - id: c
+    text: Only longer explanatory HELP text.
+    explanation: Documentation text is not the series identity.
+  correct_option: b
+  explanation: Each label set forms another series.
+- id: ats048-domain-review-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish local storage from remote storage and replication.
+  source_readings:
+  - sections/section-030/module-01/course-01-prometheus-storage-scale-and-evidence-limits.md
+  prompt: What does remote write require beyond successful local scraping?
+  options:
+  - id: a
+    text: A functioning delivery and receiving-storage path.
+    explanation: Downstream queues and destinations have independent failure modes.
+  - id: b
+    text: No configuration because every destination is automatic.
+    explanation: A receiver and transport configuration are required.
+  - id: c
+    text: Alertmanager to store all metric history.
+    explanation: Alertmanager manages notifications.
+  correct_option: a
+  explanation: Downstream queues and destinations have independent failure modes.
+- id: ats048-domain-review-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain how metric names and labels identify a time series.
+  source_readings:
+  - sections/section-040/module-01/course-01-series-identity-label-cardinality-and-staleness.md
+  prompt: What happens when an instance label changes?
+  options:
+  - id: a
+    text: Historical samples are automatically renamed in place.
+    explanation: Identity changes do not rewrite stored history.
+  - id: b
+    text: Every sample becomes a log record.
+    explanation: The data remains metric samples.
+  - id: c
+    text: The observations belong to a different series identity.
+    explanation: Labels are part of the series key.
+  correct_option: c
+  explanation: Labels are part of the series key.
+- id: ats048-domain-review-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish missing labels, empty labels and matcher behavior.
+  source_readings:
+  - sections/section-040/module-01/course-01-series-identity-label-cardinality-and-staleness.md
+  prompt: A matcher accepts an empty label value. What else can it match?
+  options:
+  - id: a
+    text: No series under any circumstances.
+    explanation: Empty-compatible matchers can select valid series.
+  - id: b
+    text: A series where that label is absent.
+    explanation: Absent labels participate as empty values in this matching behavior.
+  - id: c
+    text: Only series with every possible label present.
+    explanation: Matcher semantics do not require all labels.
+  correct_option: b
+  explanation: Absent labels participate as empty values in this matching behavior.
+- id: ats048-domain-review-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain absent samples and staleness without substituting zero automatically.
+  source_readings:
+  - sections/section-040/module-01/course-01-series-identity-label-cardinality-and-staleness.md
+  prompt: What does an absent current sample mean?
+  options:
+  - id: a
+    text: No sample is selected under the query's current rules.
+    explanation: Absence needs context and is not automatically a numerical zero.
+  - id: b
+    text: The measured value is definitely zero.
+    explanation: A missing measurement is a different condition.
+  - id: c
+    text: Every historic sample was deleted immediately.
+    explanation: Current selection and historical retention differ.
+  correct_option: a
+  explanation: Absence needs context and is not automatically a numerical zero.
+- id: ats048-domain-review-q13
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Interpret HELP, TYPE and labeled sample lines.
+  source_readings:
+  - sections/section-050/module-01/course-01-reading-metric-exposition-and-format-contracts.md
+  prompt: What does TYPE metadata describe?
+  options:
+  - id: a
+    text: The caller's Kubernetes RBAC role.
+    explanation: Exposition metadata does not grant API authority.
+  - id: b
+    text: The dashboard's visual panel type only.
+    explanation: Producer metric semantics are independent of display style.
+  - id: c
+    text: The metric family's declared type.
+    explanation: It helps establish counter, gauge or distribution semantics.
+  correct_option: c
+  explanation: It helps establish counter, gauge or distribution semantics.
+- id: ats048-domain-review-q14
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain escaping and consistent metric-family structure.
+  source_readings:
+  - sections/section-050/module-01/course-01-reading-metric-exposition-and-format-contracts.md
+  prompt: Why must label values escape quotes and backslashes correctly?
+  options:
+  - id: a
+    text: Prometheus ignores every character in label values.
+    explanation: Values affect identity and must be parsed correctly.
+  - id: b
+    text: They are embedded in a structured wire format.
+    explanation: Incorrect escaping can invalidate parsing.
+  - id: c
+    text: Escaping encrypts confidential labels.
+    explanation: Escaping is syntax handling, not confidentiality.
+  correct_option: b
+  explanation: Incorrect escaping can invalidate parsing.
+- id: ats048-domain-review-q15
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish exposition timestamps from metric values.
+  source_readings:
+  - sections/section-050/module-01/course-01-reading-metric-exposition-and-format-contracts.md
+  prompt: How does a timestamp-valued metric differ from an explicit sample timestamp?
+  options:
+  - id: a
+    text: Its value describes an event time while the sample has its own observation time.
+    explanation: Those two clocks support different queries.
+  - id: b
+    text: They are always interchangeable fields.
+    explanation: Event age and sample freshness have different meaning.
+  - id: c
+    text: Timestamp metrics cannot be represented numerically.
+    explanation: Unix time can be an ordinary gauge value.
+  correct_option: a
+  explanation: Those two clocks support different queries.
