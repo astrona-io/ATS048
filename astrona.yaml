@@ -1,9 +1,8 @@
-# Reading-only content; YAML knowledge checks have a separate index.
 training:
   id: ATS048
   title: 'PCA: Prometheus Fundamentals'
-  description: 'Detailed reading material and reusable YAML knowledge checks for PCA: Prometheus Fundamentals.
-    Technical content remains draft. No labs or playgrounds.'
+  description: 'Detailed reading material and reusable YAML knowledge checks for PCA:
+    Prometheus Fundamentals. Technical content remains draft. Private playgrounds and draft independent labs are included.'
   certification:
     name: Prometheus Certified Associate
     code: PCA
@@ -36,7 +35,7 @@ modules:
 - id: module-010
   title: System Architecture
   description: Developed reading and reasoning for System Architecture.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: System Architecture
@@ -48,12 +47,34 @@ modules:
     title: The Prometheus Collection, Storage And Rule Pipeline
     path: sections/section-010/module-01/course-01-the-prometheus-collection-storage-and-rule-pipeline.md
   - type: reading
+    title: Follow Scrape Evidence Through The Pipeline — Task
+    path: sections/section-010/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Follow Scrape Evidence Through The Pipeline
+    path: sections/section-010/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Evaluate the required expression and preserve its labels, values and evaluation
+      time.
+    tags:
+    - pca
+    - promql
+  - type: reading
+    title: Follow Scrape Evidence Through The Pipeline — Solution
+    path: sections/section-010/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Follow Scrape Evidence Through The Pipeline'
+    path: sections/section-010/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-010/module-01/course-02-summary.md
+    path: sections/section-010/module-01/course-03-summary.md
 - id: module-020
   title: Configuration and Scraping
   description: Developed reading and reasoning for Configuration and Scraping.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: Configuration and Scraping
@@ -65,12 +86,34 @@ modules:
     title: Scrape Timing, Target Labels And Failure Evidence
     path: sections/section-020/module-01/course-01-scrape-timing-target-labels-and-failure-evidence.md
   - type: reading
+    title: Measure A Scrape Configuration — Task
+    path: sections/section-020/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Measure A Scrape Configuration
+    path: sections/section-020/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Evaluate the required expression and preserve its labels, values and evaluation
+      time.
+    tags:
+    - pca
+    - promql
+  - type: reading
+    title: Measure A Scrape Configuration — Solution
+    path: sections/section-020/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Measure A Scrape Configuration'
+    path: sections/section-020/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-020/module-01/course-02-summary.md
+    path: sections/section-020/module-01/course-03-summary.md
 - id: module-030
   title: Understanding Prometheus Limitations
   description: Developed reading and reasoning for Understanding Prometheus Limitations.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: Understanding Prometheus Limitations
@@ -82,12 +125,34 @@ modules:
     title: Prometheus Storage, Scale And Evidence Limits
     path: sections/section-030/module-01/course-01-prometheus-storage-scale-and-evidence-limits.md
   - type: reading
+    title: Inspect TSDB Head Series — Task
+    path: sections/section-030/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Inspect TSDB Head Series
+    path: sections/section-030/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Evaluate the required expression and preserve its labels, values and evaluation
+      time.
+    tags:
+    - pca
+    - promql
+  - type: reading
+    title: Inspect TSDB Head Series — Solution
+    path: sections/section-030/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Inspect TSDB Head Series'
+    path: sections/section-030/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-030/module-01/course-02-summary.md
+    path: sections/section-030/module-01/course-03-summary.md
 - id: module-040
   title: Data Model and Labels
   description: Developed reading and reasoning for Data Model and Labels.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: Data Model and Labels
@@ -99,12 +164,34 @@ modules:
     title: Series Identity, Label Cardinality And Staleness
     path: sections/section-040/module-01/course-01-series-identity-label-cardinality-and-staleness.md
   - type: reading
+    title: Count Series By Status Label — Task
+    path: sections/section-040/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Count Series By Status Label
+    path: sections/section-040/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Evaluate the required expression and preserve its labels, values and evaluation
+      time.
+    tags:
+    - pca
+    - promql
+  - type: reading
+    title: Count Series By Status Label — Solution
+    path: sections/section-040/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Count Series By Status Label'
+    path: sections/section-040/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-040/module-01/course-02-summary.md
+    path: sections/section-040/module-01/course-03-summary.md
 - id: module-050
   title: Exposition Format
   description: Developed reading and reasoning for Exposition Format.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: Exposition Format
@@ -116,5 +203,26 @@ modules:
     title: Reading Metric Exposition And Format Contracts
     path: sections/section-050/module-01/course-01-reading-metric-exposition-and-format-contracts.md
   - type: reading
+    title: Read Typed Prometheus Exposition — Task
+    path: sections/section-050/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Read Typed Prometheus Exposition
+    path: sections/section-050/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: diagnostic-evidence
+    task_kind: build
+    learning_goals:
+    - Record the actual HELP, TYPE and sample lines from the producer.
+    tags:
+    - pca
+    - diagnostic-evidence
+  - type: reading
+    title: Read Typed Prometheus Exposition — Solution
+    path: sections/section-050/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Read Typed Prometheus Exposition'
+    path: sections/section-050/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-050/module-01/course-02-summary.md
+    path: sections/section-050/module-01/course-03-summary.md
