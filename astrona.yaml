@@ -35,7 +35,7 @@ modules:
 - id: module-010
   title: System Architecture
   description: Developed reading and reasoning for System Architecture.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: System Architecture
@@ -74,7 +74,7 @@ modules:
 - id: module-020
   title: Configuration and Scraping
   description: Developed reading and reasoning for Configuration and Scraping.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Configuration and Scraping
@@ -113,7 +113,7 @@ modules:
 - id: module-030
   title: Understanding Prometheus Limitations
   description: Developed reading and reasoning for Understanding Prometheus Limitations.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Understanding Prometheus Limitations
@@ -152,7 +152,7 @@ modules:
 - id: module-040
   title: Data Model and Labels
   description: Developed reading and reasoning for Data Model and Labels.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Data Model and Labels
@@ -191,7 +191,7 @@ modules:
 - id: module-050
   title: Exposition Format
   description: Developed reading and reasoning for Exposition Format.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Exposition Format
