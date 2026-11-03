@@ -1,37 +1,15 @@
----
-draft: true
-exam_objectives:
-- Configuration and Scraping
----
-# Measure A Scrape Configuration
+# Question
 
-Evaluate the required expression and preserve its labels, values and evaluation time.
+Solve this question on: `terminal`
 
-## Starting state
+Prometheus in the `starfleet` namespace reads its configuration from the ConfigMap `prometheus-config`, key `prometheus.yaml`. The job `probe` should scrape the `probe` Service, but the target never becomes healthy.
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
+Fix and tune the job `probe`. Change nothing else in the file.
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+1. Make the target healthy. The `probe` Service exposes its metrics on port 8080 at the default path.
+2. Give only this job a scrape interval of 5 seconds and a scrape timeout of 3 seconds. The global interval stays at 2 seconds.
+3. Attach the label `env` with the value `lab` to every series of this job by setting it on the target group.
 
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-048-lab-020-01-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-048-lab-020-01-01" || exit 1
-node_name="astro-ats-048-lab-020-01-01-control-plane"
-worker_name="astro-ats-048-lab-020-01-01-worker"
-```
+Make Prometheus read the changed file before you submit.
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
-
-## Required result
-
-Observe the actual duration metric; inspect the live configuration API to distinguish global defaults from per-job overrides.
-
-Use the expression `scrape_duration_seconds{job="probe"}`. The report needs `expression`, `evaluated_at` and `data`. Data is the Prometheus API data object, not only the printed value. Wait for at least twenty seconds of collected traffic before using a rate. Record evidence within five minutes of submission. Changing the expression or claiming an empty result fails.
-
-Record observations in `starfleet/evidence`, whose `report.json` contains the stated report. The verifier reads the live API again; invented values do not pass.
-
-The report object uses these fields: `expression`, `evaluated_at`, `data`. Keep numeric values numeric and preserve arrays and nested objects returned by the API.
-
-## Verify The Result
-
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+`kubectl` already points at the cluster as the cluster administrator.

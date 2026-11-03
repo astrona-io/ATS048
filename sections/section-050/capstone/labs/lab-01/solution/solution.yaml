@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: exporter-metrics
+  namespace: starfleet
+data:
+  metrics.txt: |
+    # HELP lab_jobs_processed_total Jobs processed by the worker, by result.
+    # TYPE lab_jobs_processed_total counter
+    lab_jobs_processed_total{queue="default",result="ok"} 1027
+    lab_jobs_processed_total{queue="default",result="error"} 13
+    # HELP lab_workers Number of running workers.
+    # TYPE lab_workers gauge
+    lab_workers 4
+    # HELP lab_task_duration_seconds Task duration in seconds.
+    # TYPE lab_task_duration_seconds histogram
+    lab_task_duration_seconds_bucket{le="0.1"} 600
+    lab_task_duration_seconds_bucket{le="0.5"} 900
+    lab_task_duration_seconds_bucket{le="1"} 1000
+    lab_task_duration_seconds_bucket{le="+Inf"} 1040
+    lab_task_duration_seconds_sum 412.5
+    lab_task_duration_seconds_count 1040

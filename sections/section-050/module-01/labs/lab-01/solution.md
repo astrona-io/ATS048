@@ -1,84 +1,115 @@
----
-draft: true
-exam_objectives:
-- Exposition Format
----
-# Read Typed Prometheus Exposition Solution
+# Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Solve this lab on `terminal`. Each step ends with `astrona submit`. The `--keep` flag keeps the lab running so you can continue after a failed check.
+
+Start the lab if it is not running:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-048-lab-050-01-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-048-lab-050-01-01" || exit 1
-node_name="astro-ats-048-lab-050-01-01-control-plane"
-worker_name="astro-ats-048-lab-050-01-01-worker"
+astrona run --git ssh://git@github.com/astrona-io/ATS048.git -c sections/section-050/module-01/labs/lab-01
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Submit once before you change anything. All four checks fail because the page cannot be parsed.
 
-## Inspect And Explain
+## Step 1: Read the error Prometheus reports
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
-
-Inspect the current objects before changing them:
+Prometheus fetches the page with an HTTP request and parses the body line by line. If one line is invalid, the parser stops and Prometheus treats the whole scrape as failed: the target is `down` and no sample of that scrape is stored. The targets API shows the reason:
 
 ```sh
-kubectl -n starfleet get pods -o wide
-kubectl get nodes -o wide
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/targets?state=active'
 ```
 
-Store a `types` map containing lab_requests_total: counter, lab_queue_depth: gauge and lab_request_duration_seconds: histogram. Check the live endpoint; a handwritten sample alone is not evidence.
-
-Record observations in `starfleet/evidence`, whose `report.json` contains the stated report. The verifier reads the live API again; invented values do not pass.
-
-
-Save this as `record.py`:
-
-```python
-import json,subprocess,time,sys,tempfile,os
-
-def call(*args):
- r=subprocess.run(list(args),text=True,capture_output=True,timeout=20)
- assert r.returncode==0, 'Observation command failed: '+args[0]
- return r.stdout.strip()
-def obj(kind,name,ns='starfleet'):
- return json.loads(call('kubectl',*(['-n',ns] if ns else []),'get',kind,name,'-o','json'))
-def api(path):
- script='import urllib.request; print(urllib.request.urlopen('+repr('http://prometheus:9090'+path)+',timeout=8).read().decode())'
- return json.loads(call('kubectl','-n','starfleet','exec','shuttle','--','python','-c',script))
-def save(data):
- resource={'apiVersion':'v1','kind':'ConfigMap','metadata':{'name':'evidence','namespace':'starfleet'},'data':{'report.json':json.dumps(data,sort_keys=True)}}
- with tempfile.NamedTemporaryFile(mode='w',suffix='.json',delete=False) as f:json.dump(resource,f);path=f.name
- try:call('kubectl','apply','-f',path)
- finally:os.unlink(path)
-
-assert call('kubectl','config','current-context') == 'kind-astro-ats-048-lab-050-01-01'
-script="import urllib.request; print(urllib.request.urlopen('http://probe:8080/metrics',timeout=5).read().decode())"
-text=call('kubectl','-n','starfleet','exec','shuttle','--','python','-c',script)
-report={'types':{line.split()[2]:line.split()[3] for line in text.splitlines() if line.startswith('# TYPE ')}}
-save(report)
-```
-
-Apply the scoped correction:
+Find the target with the label `job` set to `exporter`. Its `lastError` field holds the parser message. It names the line number of the first invalid line, so you fix problems one at a time. Request the page yourself to see the lines:
 
 ```sh
-python3 record.py
+kubectl -n starfleet exec shuttle -- wget -qO- http://exporter:8080/metrics
 ```
 
-## Verify The Result
+## Step 2: Know the rules of one sample line
 
-Observe the actual result. A denied request returns a nonzero status when the denial works, so run it separately from a shell sequence that stops on error. Status convergence and a successful request establish different parts of the result.
+A sample line has the form `metric_name{label="value",...} value`. These rules apply:
+
+- A metric name matches `[a-zA-Z_:][a-zA-Z0-9_:]*`. A hyphen is not allowed.
+- Label names match `[a-zA-Z_][a-zA-Z0-9_]*`.
+- A label value is always inside double quotes. Inside the quotes, a backslash, a double quote and a newline are written as `\\`, `\"` and `\n`.
+- The value is a floating-point number. It may also be `NaN`, `+Inf` or `-Inf`. A word such as `four` is not a number.
+- A `# TYPE` line must come before the first sample of that metric and must appear only once per metric name.
+
+The page has three faults. In `lab_jobs_processed_total{queue=default,...}` the value of `queue` has no quotes. The gauge `lab_workers` has the value `four`. The last metric is written as `lab-queue-length`, which has hyphens, and does not match its `# TYPE` line, which says `lab_queue_length`.
+
+## Step 3: Write the correct page
+
+Save this as `exporter-metrics.yaml`. The ConfigMap name and the key stay the same:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: exporter-metrics
+  namespace: starfleet
+data:
+  metrics.txt: |
+    # HELP lab_jobs_processed_total Jobs processed by the worker, by result.
+    # TYPE lab_jobs_processed_total counter
+    lab_jobs_processed_total{queue="default",result="ok"} 1027
+    lab_jobs_processed_total{queue="default",result="error"} 13
+    # HELP lab_workers Number of running workers.
+    # TYPE lab_workers gauge
+    lab_workers 4
+    # HELP lab_queue_length Jobs waiting in the queue.
+    # TYPE lab_queue_length gauge
+    lab_queue_length 7
+```
+
+Apply it:
 
 ```sh
-kubectl -n starfleet get configmaps
-kubectl -n starfleet get deployment probe -o yaml
+kubectl apply -f exporter-metrics.yaml
 ```
 
-Record the actual HELP, TYPE and sample lines from the producer. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.
+## Step 4: Make the pod serve the new content
 
-After recording your result, remove the independent lab with `astrona destroy ats-048-lab-050-01-01`.
+A ConfigMap mounted as a volume updates in the pod after a delay of up to about a minute. A restart of the Deployment avoids the wait, because the new pod mounts the current ConfigMap:
 
-## Common pitfalls
+```sh
+kubectl -n starfleet rollout restart deployment/exporter
+kubectl -n starfleet rollout status deployment/exporter
+```
 
-> [!WARNING]
-> Confirm the private context and exact node names before a change. Check the stated scope and live result. Do not change unrelated components to hide the original fault.
+Request the page again to see the new content:
+
+```sh
+kubectl -n starfleet exec shuttle -- wget -qO- http://exporter:8080/metrics
+```
+
+## Step 5: Check the result in Prometheus
+
+Wait for the next scrape, which is at most two seconds away, then query:
+
+```sh
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/query?query=up{job="exporter"}'
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/query?query=lab_jobs_processed_total'
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/metadata?metric=lab_workers'
+```
+
+`up` is 1. The counter has two series, one for each `result` value. The metadata answer lists the type `gauge` and the help text from the `# HELP` line.
+
+## Step 6: Submit
+
+```sh
+astrona submit --git ssh://git@github.com/astrona-io/ATS048.git -c sections/section-050/module-01/labs/lab-01 --keep
+```
+
+Four checks must pass.
+
+## What each check proved
+
+- `exporter-scrape-ok` required `up` equal to 1. A page with any invalid line cannot pass.
+- `counter-series` required the two exact series and values. It proves the quotes around the label value and the number format.
+- `gauge-values` required the values 4 and 7. The second also proves that the metric name is valid and matches its type line.
+- `types-declared` read the metadata API. Prometheus learns the types from the `# TYPE` lines of the page, so the check proves that the type lines are in the right place.
+
+## If a check fails
+
+- If `up` is still 0, read `lastError` again. The first error you fixed may have hidden a second one on a later line.
+- If the page in the pod is still the old one, the pod has not restarted. Run the rollout status command and request the page again.
+- If `types-declared` fails while the series exist, a `# TYPE` line is missing or comes after the first sample of its metric.

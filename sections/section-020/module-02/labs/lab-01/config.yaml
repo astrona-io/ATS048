@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Rewrite Labels And Drop A Metric With Relabeling (LAB). Graded against the live Prometheus API.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-048-lab-020-02-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
+bootstrap:
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: instance-relabeled
+      description: The probe target has instance="probe-main" and is up
+      type: file
+      source: validation/validate-instance-relabeled.sh
+      hint: Relabel the target before the scrape with relabel_configs and the replace action on target_label instance.
+    - name: tier-label-added
+      description: Every probe series has tier="backend"
+      type: file
+      source: validation/validate-tier-label-added.sh
+      hint: A replace rule without source_labels writes the replacement as a constant.
+    - name: queue-depth-dropped
+      description: lab_queue_depth is not stored, and all other probe series still are
+      type: file
+      source: validation/validate-queue-depth-dropped.sh
+      hint: Drop by metric name in metric_relabel_configs, which runs after the scrape.
+
+teardown:
+  keepCluster: false

@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Explore Relabeling (PLAYGROUND). A clean sandbox with no task and no grading.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-048-playground-020-02
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
+bootstrap:
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+
+teardown:
+  keepCluster: false

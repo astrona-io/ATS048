@@ -1,0 +1,468 @@
+# Knowledge check for section 010. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats048-010
+course_id: ATS048
+exam_code: PCA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-010
+  title: "System Architecture"
+questions:
+  - id: ats048-010-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain what the up series shows and what it does not show"
+    source_readings:
+      - sections/section-010/module-01/course-01-scrape-pipeline-and-targets.md
+    prompt: |-
+      The `probe` target shows `up` equal to 1, but users report that every real request fails. What does `up` tell you?
+    options:
+      - id: a
+        text: "The application is healthy, so the reports are wrong."
+        explanation: "`up` does not measure application health."
+      - id: b
+        text: "The last scrape of the target succeeded, and nothing more."
+        explanation: "Correct. `up` records only whether the scrape worked. The application can fail on real requests while `/metrics` still answers."
+      - id: c
+        text: "All requests in the last minute succeeded."
+        explanation: "This option confuses scrape success with request success."
+      - id: d
+        text: "The Prometheus server stored the samples on disk."
+        explanation: "Storage is not what `up` measures."
+    correct_option: b
+    explanation: "`up` is 1 when the scrape request succeeds. It is not a health check of the application logic."
+
+  - id: ats048-010-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the component that fetches metrics from targets"
+    source_readings:
+      - sections/section-010/module-01/course-01-scrape-pipeline-and-targets.md
+    prompt: |-
+      Which component of the Prometheus server sends the HTTP requests to targets on a schedule?
+    options:
+      - id: a
+        text: "The PromQL engine."
+        explanation: "The PromQL engine evaluates queries and does not contact targets."
+      - id: b
+        text: "The scrape manager."
+        explanation: "Correct. It runs a scrape loop for every target and hands the samples to the database."
+      - id: c
+        text: "The rule manager."
+        explanation: "The rule manager evaluates rules and does not contact targets."
+      - id: d
+        text: "Alertmanager."
+        explanation: "Alertmanager is a separate program that only receives alerts."
+    correct_option: b
+    explanation: "The scrape manager fetches the exposition text from each target."
+
+  - id: ats048-010-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain why exporters exist"
+    source_readings:
+      - sections/section-010/module-01/course-01-scrape-pipeline-and-targets.md
+    prompt: |-
+      A database does not expose the Prometheus text format. What is the usual solution?
+    options:
+      - id: a
+        text: "Run an exporter that reads the database and exposes `/metrics`."
+        explanation: "Correct. Prometheus scrapes the exporter like any other target."
+      - id: b
+        text: "Make the database push samples to the TSDB directly."
+        explanation: "The TSDB has no push interface for targets."
+      - id: c
+        text: "Set `honor_labels: true` on the scrape job."
+        explanation: "That setting only controls label conflicts."
+      - id: d
+        text: "Add a recording rule for the database."
+        explanation: "A recording rule reads existing series and cannot create them."
+    correct_option: a
+    explanation: "An exporter translates the numbers of a system into the Prometheus format."
+
+  - id: ats048-010-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Describe how samples move from the head block to persisted blocks"
+    source_readings:
+      - sections/section-010/module-01/course-02-tsdb-storage-and-querying.md
+    prompt: |-
+      A Prometheus server restarts. Which structure lets it rebuild the recent in-memory data?
+    options:
+      - id: a
+        text: "The persisted blocks only."
+        explanation: "Persisted blocks hold older data, not the latest samples of the head."
+      - id: b
+        text: "The write-ahead log."
+        explanation: "Correct. Every sample is also appended to the WAL, and the server replays it at start to rebuild the head block."
+      - id: c
+        text: "Alertmanager state."
+        explanation: "Alertmanager holds alerts and has no samples."
+      - id: d
+        text: "The scrape targets, which resend their history."
+        explanation: "Targets only report current values."
+    correct_option: b
+    explanation: "The WAL protects the head block against loss on restart."
+
+  - id: ats048-010-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose between an instant query and a range query"
+    source_readings:
+      - sections/section-010/module-01/course-02-tsdb-storage-and-querying.md
+    prompt: |-
+      Which API endpoint returns a matrix of samples over a time range?
+    options:
+      - id: a
+        text: "`/api/v1/query`."
+        explanation: "This endpoint evaluates at one point in time and returns a vector."
+      - id: b
+        text: "`/api/v1/query_range`."
+        explanation: "Correct. It takes start, end and step and returns a matrix."
+      - id: c
+        text: "`/api/v1/targets`."
+        explanation: "It lists targets."
+      - id: d
+        text: "`/federate`."
+        explanation: "It returns series in text exposition format."
+    correct_option: b
+    explanation: "The range endpoint evaluates the expression at each step."
+
+  - id: ats048-010-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Use rate on a counter"
+    source_readings:
+      - sections/section-010/module-01/course-02-tsdb-storage-and-querying.md
+    prompt: |-
+      Why does `rate(lab_requests_total[1m])` return nothing right after a Prometheus pod starts with an empty database?
+    options:
+      - id: a
+        text: "Counters cannot be used with `rate`."
+        explanation: "`rate` is made for counters."
+      - id: b
+        text: "The window needs at least two samples and the new database has fewer."
+        explanation: "Correct. After about a minute of scraping the window holds enough samples."
+      - id: c
+        text: "Recording rules must be loaded first."
+        explanation: "`rate` does not need a recording rule."
+      - id: d
+        text: "The range vector selector is not allowed in the API."
+        explanation: "It is allowed inside a function."
+    correct_option: b
+    explanation: "A range function needs two samples in its window."
+
+  - id: ats048-010-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain the role of a recording rule"
+    source_readings:
+      - sections/section-010/module-01/course-03-recording-rules.md
+    prompt: |-
+      What does a recording rule do?
+    options:
+      - id: a
+        text: "It evaluates an expression on a schedule and stores the result as a new series."
+        explanation: "Correct. The result is queryable under the name in `record`."
+      - id: b
+        text: "It sends the result to Alertmanager."
+        explanation: "That is the job of alerting rules."
+      - id: c
+        text: "It fills past gaps in the raw series."
+        explanation: "A recording rule has no history before its first evaluation."
+      - id: d
+        text: "It changes labels of the scraped target."
+        explanation: "That is relabeling."
+    correct_option: a
+    explanation: "Recording rules precompute expressions and store the result."
+
+  - id: ats048-010-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Make a changed rule file take effect"
+    source_readings:
+      - sections/section-010/module-01/course-03-recording-rules.md
+    prompt: |-
+      You applied a changed ConfigMap with the rule file, and `/api/v1/rules` still shows the old rules. What is missing?
+    options:
+      - id: a
+        text: "A new scrape job."
+        explanation: "Scrape jobs do not load rules."
+      - id: b
+        text: "A reload or restart of Prometheus."
+        explanation: "Correct. Rule files are read at start and on reload."
+      - id: c
+        text: "A silence in Alertmanager."
+        explanation: "Silences do not affect rule loading."
+      - id: d
+        text: "Remote write."
+        explanation: "Remote write has no part in loading rules."
+    correct_option: b
+    explanation: "The server must reload or restart to read a changed rule file."
+
+  - id: ats048-010-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Describe pending and firing states"
+    source_readings:
+      - sections/section-010/module-02/course-01-alerting-rules-and-alert-states.md
+    prompt: |-
+      An alerting rule has `for: 10s`. Its expression is true for 4 seconds and then returns nothing. What state does the alert end in?
+    options:
+      - id: a
+        text: "Firing, because the condition was true once."
+        explanation: "Firing needs the full `for` duration."
+      - id: b
+        text: "Pending, then inactive again."
+        explanation: "Correct. The alert did not stay active for 10 seconds, so it never fires."
+      - id: c
+        text: "Silenced."
+        explanation: "A silence is set in Alertmanager by an operator."
+      - id: d
+        text: "Resolved in Alertmanager."
+        explanation: "It was never sent to Alertmanager."
+    correct_option: b
+    explanation: "The `for` field filters short spikes."
+
+  - id: ats048-010-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Diagnose an alert that never fires"
+    source_readings:
+      - sections/section-010/module-02/course-01-alerting-rules-and-alert-states.md
+    prompt: |-
+      An alerting rule has `health` of `ok`, but its alert is always inactive. Which cause fits best?
+    options:
+      - id: a
+        text: "The expression selects a metric name that does not exist, so it returns an empty result."
+        explanation: "Correct. A valid expression with no matching series is healthy and never produces an alert."
+      - id: b
+        text: "Alertmanager has a wrong port."
+        explanation: "That affects delivery, not the state in Prometheus."
+      - id: c
+        text: "A silence matches the alert."
+        explanation: "A silence does not change the state in Prometheus."
+      - id: d
+        text: "The group uses `group_by`."
+        explanation: "`group_by` is an Alertmanager routing setting."
+    correct_option: a
+    explanation: "Check the expression with a query first."
+
+  - id: ats048-010-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Connect Prometheus to Alertmanager"
+    source_readings:
+      - sections/section-010/module-02/course-02-alertmanager-routing-and-suppression.md
+    prompt: |-
+      Which part of the Prometheus configuration tells it where Alertmanager listens?
+    options:
+      - id: a
+        text: "`scrape_configs`."
+        explanation: "This lists scrape targets."
+      - id: b
+        text: "`alerting` with `alertmanagers`."
+        explanation: "Correct. Each entry lists Alertmanager targets."
+      - id: c
+        text: "`rule_files`."
+        explanation: "This lists rule files."
+      - id: d
+        text: "`remote_write`."
+        explanation: "This sends samples to remote storage."
+    correct_option: b
+    explanation: "The `alerting.alertmanagers` list holds the addresses."
+
+  - id: ats048-010-q12
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Debug a missing notification"
+    source_readings:
+      - sections/section-010/module-02/course-02-alertmanager-routing-and-suppression.md
+    prompt: |-
+      Prometheus shows `QueueTooDeep` firing, but `/api/v2/alerts` on Alertmanager is empty. Where is the problem?
+    options:
+      - id: a
+        text: "The webhook receiver."
+        explanation: "The alert has not arrived in Alertmanager yet, so the receiver is not involved."
+      - id: b
+        text: "The connection from Prometheus to Alertmanager, such as a wrong port."
+        explanation: "Correct. Alerts reach Alertmanager only through the `alerting` section, so check `/api/v1/alertmanagers`."
+      - id: c
+        text: "An inhibit rule."
+        explanation: "An inhibited alert is still listed in Alertmanager."
+      - id: d
+        text: "The `group_wait` timer."
+        explanation: "The timer delays notifications, not the arrival of alerts."
+    correct_option: b
+    explanation: "An empty Alertmanager list points at the connection."
+
+  - id: ats048-010-q13
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Distinguish silences from inhibition"
+    source_readings:
+      - sections/section-010/module-02/course-02-alertmanager-routing-and-suppression.md
+    prompt: |-
+      Planned maintenance on one service will fire alerts for two hours. Which tool mutes them for a fixed time without a configuration change?
+    options:
+      - id: a
+        text: "An inhibit rule."
+        explanation: "Inhibition depends on a source alert and is set in the configuration file."
+      - id: b
+        text: "A silence with matchers."
+        explanation: "Correct. A silence is created at run time and ends at its end time."
+      - id: c
+        text: "A longer `for` in the rule."
+        explanation: "This delays firing but does not mute it."
+      - id: d
+        text: "A recording rule."
+        explanation: "Recording rules do not mute alerts."
+    correct_option: b
+    explanation: "A silence mutes matching alerts for a period of time."
+
+  - id: ats048-010-q14
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Explain grouping"
+    source_readings:
+      - sections/section-010/module-02/course-02-alertmanager-routing-and-suppression.md
+    prompt: |-
+      The route has `group_by: [alertname]`. Twenty instances fire `HighLatency` within a few seconds. What does the receiver get first?
+    options:
+      - id: a
+        text: "Twenty separate notifications."
+        explanation: "They share the same `alertname`, so they belong to one group."
+      - id: b
+        text: "One notification with all twenty alerts, after `group_wait`."
+        explanation: "Correct. Grouping combines alerts with the same grouping labels."
+      - id: c
+        text: "No notification, because the alerts are duplicates."
+        explanation: "Different instances are different alerts."
+      - id: d
+        text: "One notification for each instance, after `group_interval`."
+        explanation: "That would need `instance` in `group_by`."
+    correct_option: b
+    explanation: "Grouping reduces the number of notifications."
+
+  - id: ats048-010-q15
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose the Pushgateway for batch jobs"
+    source_readings:
+      - sections/section-010/module-02/course-03-extension-architecture.md
+    prompt: |-
+      A nightly backup job runs for six seconds. Which component lets Prometheus keep its result?
+    options:
+      - id: a
+        text: "Federation."
+        explanation: "Federation scrapes another Prometheus server."
+      - id: b
+        text: "The Pushgateway."
+        explanation: "Correct. The job pushes its metrics, and Prometheus scrapes the Pushgateway."
+      - id: c
+        text: "Remote read."
+        explanation: "Remote read queries old data from remote storage."
+      - id: d
+        text: "A silence."
+        explanation: "Silences mute notifications."
+    correct_option: b
+    explanation: "The Pushgateway is for service-level batch jobs."
+
+  - id: ats048-010-q16
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Name the risk of the Pushgateway"
+    source_readings:
+      - sections/section-010/module-02/course-03-extension-architecture.md
+    prompt: |-
+      Which statement about the Pushgateway is correct?
+    options:
+      - id: a
+        text: "It deletes the metrics of a job when the job exits."
+        explanation: "It keeps the values until they are deleted."
+      - id: b
+        text: "It keeps pushed values until deleted, so a stopped job can still look current."
+        explanation: "Correct. This is why it is not used for long-running services."
+      - id: c
+        text: "It evaluates alerting rules."
+        explanation: "Only Prometheus evaluates rules."
+      - id: d
+        text: "It replaces scraping for all targets."
+        explanation: "It is meant only for batch jobs."
+    correct_option: b
+    explanation: "Stale values stay in a Pushgateway."
+
+  - id: ats048-010-q17
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Describe federation"
+    source_readings:
+      - sections/section-010/module-02/course-03-extension-architecture.md
+    prompt: |-
+      A global Prometheus must read a few aggregated series from a cluster Prometheus and keep the original labels. Which scrape settings fit?
+    options:
+      - id: a
+        text: "`metrics_path: /federate`, `match[]` parameters and `honor_labels: true`."
+        explanation: "Correct. This is the federation pattern."
+      - id: b
+        text: "`metrics_path: /api/v1/write`."
+        explanation: "That endpoint receives remote write samples."
+      - id: c
+        text: "`remote_read` with an empty `url`."
+        explanation: "Remote read needs a remote system."
+      - id: d
+        text: "A Kubernetes `ingress` role."
+        explanation: "Roles select discovery objects, not federation."
+    correct_option: a
+    explanation: "Federation scrapes `/federate` with match parameters."
+
+  - id: ats048-010-q18
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Use remote write"
+    source_readings:
+      - sections/section-010/module-02/course-03-extension-architecture.md
+    prompt: |-
+      What does the `remote_write` section do?
+    options:
+      - id: a
+        text: "It sends scraped samples to another system in batches."
+        explanation: "Correct. It is used for long-term storage or a central query layer."
+      - id: b
+        text: "It receives alerts from other servers."
+        explanation: "That is Alertmanager behaviour."
+      - id: c
+        text: "It writes the rule files."
+        explanation: "Rule files are written by users."
+      - id: d
+        text: "It reloads the configuration."
+        explanation: "Reload uses a signal or the lifecycle endpoint."
+    correct_option: a
+    explanation: "Remote write copies samples out."
+
+  - id: ats048-010-q19
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Pick the Kubernetes service discovery role"
+    source_readings:
+      - sections/section-010/module-02/course-03-extension-architecture.md
+    prompt: |-
+      You need one target for each address of the endpoints behind a Service, with Service and pod metadata. Which role fits best on a large cluster?
+    options:
+      - id: a
+        text: "`node`."
+        explanation: "This gives one target per node."
+      - id: b
+        text: "`endpointslice`."
+        explanation: "Correct. It gives one target per endpoint address using the EndpointSlice API, which scales better than `endpoints`."
+      - id: c
+        text: "`ingress`."
+        explanation: "This gives targets per Ingress path."
+      - id: d
+        text: "`service`."
+        explanation: "This gives one target per Service port, not per endpoint."
+    correct_option: b
+    explanation: "The endpointslice role is the scalable form of endpoints."

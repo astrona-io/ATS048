@@ -1,0 +1,33 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: starfleet
+data:
+  prometheus.yaml: |
+    global:
+      evaluation_interval: 2s
+      scrape_interval: 2s
+    rule_files:
+    - /rules/*.yaml
+    scrape_configs:
+    - job_name: probe
+      static_configs:
+      - labels:
+          team: starfleet
+        targets:
+        - probe:8080
+      relabel_configs:
+      - target_label: tier
+        replacement: backend
+      - target_label: instance
+        replacement: probe-main
+      metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: lab_queue_depth
+        action: drop
+    - job_name: prometheus
+      static_configs:
+      - targets:
+        - localhost:9090

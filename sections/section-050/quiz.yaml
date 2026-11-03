@@ -1,0 +1,327 @@
+# Knowledge check for section 050. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats048-050
+course_id: ATS048
+exam_code: PCA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-050
+  title: "Exposition Format"
+questions:
+  - id: ats048-050-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Write a valid sample line with quoted label values"
+    source_readings:
+      - sections/section-050/module-01/course-01-text-format-lines-and-families.md
+    prompt: |-
+      Which line is a valid sample in the Prometheus text format?
+    options:
+      - id: a
+        text: "`lab_jobs_total{queue=default} 3`"
+        explanation: "The label value has no double quotes, so the parser rejects the line."
+      - id: b
+        text: "`lab-jobs-total{queue=\"default\"} 3`"
+        explanation: "A metric name cannot contain hyphens. Only letters, digits, underscores and colons are valid."
+      - id: c
+        text: "`lab_jobs_total{queue=\"default\"} three`"
+        explanation: "The value must be a float, or NaN, +Inf or -Inf. A word is not a number."
+      - id: d
+        text: "`lab_jobs_total{queue=\"default\"} 3`"
+        explanation: "Correct. The name is valid, the label value is in double quotes and the value is a float."
+    correct_option: d
+    explanation: "A sample line has a valid metric name, optional labels with quoted values and a float value."
+
+  - id: ats048-050-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain what one invalid line does to a scrape"
+    source_readings:
+      - sections/section-050/module-01/course-03-content-type-and-checking-pages.md
+    prompt: |-
+      A page from a target has 40 valid sample lines and one line with a label value without quotes. What does Prometheus do with this scrape?
+    options:
+      - id: a
+        text: "It stores the 40 valid samples and skips the bad line."
+        explanation: "The parser does not skip lines. It fails the scrape."
+      - id: b
+        text: "It marks the scrape as failed, sets `up` to 0 and stores no samples from that scrape."
+        explanation: "Correct. One invalid line makes the whole scrape fail, and `lastError` holds the parser message."
+      - id: c
+        text: "It stores the samples before the bad line and drops the rest."
+        explanation: "Prometheus does not store a partial page."
+      - id: d
+        text: "It repairs the line by adding the quotes."
+        explanation: "Prometheus never changes the content of a page."
+    correct_option: b
+    explanation: "Prometheus treats a scrape as one unit, so one invalid line fails it."
+
+  - id: ats048-050-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Apply the rules for the TYPE line"
+    source_readings:
+      - sections/section-050/module-01/course-01-text-format-lines-and-families.md
+    prompt: |-
+      Which statement about `# TYPE` lines in the text format is correct?
+    options:
+      - id: a
+        text: "A metric may have several `# TYPE` lines, one before each sample."
+        explanation: "A metric has at most one `# TYPE` line."
+      - id: b
+        text: "The `# TYPE` line must come before the first sample of that metric, and appears once."
+        explanation: "Correct. Without a `# TYPE` line the type is `untyped`."
+      - id: c
+        text: "The `# TYPE` line may come at the end of the page."
+        explanation: "It must come before the first sample of its metric."
+      - id: d
+        text: "The `# TYPE` line is required, or the page is rejected."
+        explanation: "The line is optional. A metric without it is `untyped`."
+    correct_option: b
+    explanation: "The `# TYPE` line is optional, appears at most once and comes before the first sample."
+
+  - id: ats048-050-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Escape special characters in label values"
+    source_readings:
+      - sections/section-050/module-01/course-01-text-format-lines-and-families.md
+    prompt: |-
+      A label value must contain the text `said "stop"`. How is it written in the text format?
+    options:
+      - id: a
+        text: "`note=\"said \\\"stop\\\"\"`, with a backslash before each inner double quote."
+        explanation: "Correct. A double quote inside a label value is written as `\\\"`."
+      - id: b
+        text: "`note=\"said \"stop\"\"`, with no escape."
+        explanation: "The inner quotes end the value early, and the line is invalid."
+      - id: c
+        text: "`note='said \"stop\"'`, with single quotes."
+        explanation: "Label values must be in double quotes in the text format."
+      - id: d
+        text: "`note=said \"stop\"`, without outer quotes."
+        explanation: "A label value always needs outer double quotes."
+    correct_option: a
+    explanation: "A backslash, a double quote and a line feed in a label value are written as `\\\\`, `\\\"` and `\\n`."
+
+  - id: ats048-050-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read the cumulative buckets of a histogram"
+    source_readings:
+      - sections/section-050/module-01/course-02-histograms-and-summaries.md
+    prompt: |-
+      A histogram page has `_bucket{le="0.1"} 600`, `_bucket{le="0.5"} 900` and `_bucket{le="+Inf"} 1040`. How many observations were larger than 0.5?
+    options:
+      - id: a
+        text: "140."
+        explanation: "Correct. The `+Inf` bucket counts all 1040 observations and 900 are 0.5 or smaller, so 140 are larger."
+      - id: b
+        text: "900."
+        explanation: "900 is the count of observations that are 0.5 or smaller."
+      - id: c
+        text: "300."
+        explanation: "300 is the count between 0.1 and 0.5, not above 0.5."
+      - id: d
+        text: "1040."
+        explanation: "1040 is the total number of observations."
+    correct_option: a
+    explanation: "Buckets are cumulative, so subtract the bucket count from the total."
+
+  - id: ats048-050-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain the effect of a missing +Inf bucket"
+    source_readings:
+      - sections/section-050/module-01/course-02-histograms-and-summaries.md
+      - sections/section-050/module-02/course-02-histograms-exemplars-and-native-histograms.md
+    prompt: |-
+      An application serves a histogram without the bucket `le="+Inf"`. The target shows `up` as 1. What happens to `histogram_quantile(0.9, ...)` on that histogram?
+    options:
+      - id: a
+        text: "It returns `NaN`, because the function takes the total count from the `+Inf` bucket."
+        explanation: "Correct. Prometheus parses the page without an error, and the damage appears in the quantile."
+      - id: b
+        text: "It returns the largest bucket bound."
+        explanation: "The function does not fall back to the largest bound."
+      - id: c
+        text: "The scrape fails and `up` becomes 0."
+        explanation: "Prometheus does not check histogram completeness when it parses."
+      - id: d
+        text: "It returns 0."
+        explanation: "The result is `NaN`, not 0."
+    correct_option: a
+    explanation: "A histogram without the `+Inf` bucket is ingested, but `histogram_quantile` returns `NaN`."
+
+  - id: ats048-050-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Compare histogram and summary quantiles"
+    source_readings:
+      - sections/section-050/module-01/course-02-histograms-and-summaries.md
+    prompt: |-
+      A service runs on five instances. You need the 99th percentile of request duration for the whole service. Which choice works?
+    options:
+      - id: a
+        text: "Average the `quantile=\"0.99\"` values of five summaries."
+        explanation: "An average of quantiles has no meaning."
+      - id: b
+        text: "Take the largest `quantile=\"0.99\"` value of the five summaries."
+        explanation: "The largest value is not the quantile of the whole service."
+      - id: c
+        text: "Add the `_bucket` series of the histograms from all instances and then run `histogram_quantile`."
+        explanation: "Correct. Buckets can be added across instances, and the quantile is then valid for the service."
+      - id: d
+        text: "Divide `_sum` by `_count` of one instance."
+        explanation: "That gives an average of one instance, not a percentile."
+    correct_option: c
+    explanation: "Histogram buckets can be combined across instances. Summary quantiles cannot."
+
+  - id: ats048-050-q08
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name what selects the parser for a scrape"
+    source_readings:
+      - sections/section-050/module-01/course-03-content-type-and-checking-pages.md
+      - sections/section-050/module-02/course-01-openmetrics-and-negotiation.md
+    prompt: |-
+      What tells Prometheus which parser to use for the body of a scrape response?
+    options:
+      - id: a
+        text: "The first line of the body."
+        explanation: "Prometheus does not look at the body to choose a parser."
+      - id: b
+        text: "The `Content-Type` header of the response."
+        explanation: "Correct. Prometheus picks the parser that matches the content type."
+      - id: c
+        text: "The name of the job."
+        explanation: "The job name has no effect on the parser."
+      - id: d
+        text: "The port of the target."
+        explanation: "The port has no effect on the parser."
+    correct_option: b
+    explanation: "The response `Content-Type` selects the parser, and a missing or unsupported one fails the scrape in Prometheus 3.0 and later."
+
+  - id: ats048-050-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Apply the OpenMetrics end marker rule"
+    source_readings:
+      - sections/section-050/module-02/course-01-openmetrics-and-negotiation.md
+    prompt: |-
+      A target answers an OpenMetrics request with the content type `application/openmetrics-text` and a page that is otherwise valid but has no last `# EOF` line. What is the result?
+    options:
+      - id: a
+        text: "The scrape succeeds, because `# EOF` is optional."
+        explanation: "It is required in OpenMetrics."
+      - id: b
+        text: "The scrape fails, and `lastError` says that the data does not end with `# EOF`."
+        explanation: "Correct. The marker protects against a truncated page."
+      - id: c
+        text: "Prometheus adds the line and continues."
+        explanation: "Prometheus does not change the page."
+      - id: d
+        text: "Prometheus falls back to the classic parser for this page."
+        explanation: "The parser follows the content type of the response, so it does not fall back."
+    correct_option: b
+    explanation: "A page under the OpenMetrics content type must end with `# EOF`."
+
+  - id: ats048-050-q10
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Write a counter family in OpenMetrics"
+    source_readings:
+      - sections/section-050/module-02/course-01-openmetrics-and-negotiation.md
+    prompt: |-
+      Which lines declare a counter correctly in OpenMetrics?
+    options:
+      - id: a
+        text: "`# TYPE lab_jobs_failed_total counter` followed by `lab_jobs_failed 5`."
+        explanation: "The suffix is on the wrong name. The samples carry `_total`."
+      - id: b
+        text: "`# TYPE lab_jobs_failed counter` followed by `lab_jobs_failed_total 5`."
+        explanation: "Correct. The family name has no suffix and the sample has `_total`."
+      - id: c
+        text: "`# TYPE lab_jobs_failed counter` followed by `lab_jobs_failed 5`."
+        explanation: "The counter sample must have the suffix `_total`."
+      - id: d
+        text: "`# TYPE lab_jobs_failed gauge` followed by `lab_jobs_failed_total 5`."
+        explanation: "The type is wrong. A counter is declared with the type `counter`."
+    correct_option: b
+    explanation: "OpenMetrics declares the family without a suffix and writes the samples with `_total`."
+
+  - id: ats048-050-q11
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Explain what exemplars and native histograms need"
+    source_readings:
+      - sections/section-050/module-02/course-02-histograms-exemplars-and-native-histograms.md
+    prompt: |-
+      Which statement about exemplars and native histograms is correct?
+    options:
+      - id: a
+        text: "Both are written in the classic text format after the `# TYPE` line."
+        explanation: "The classic text format carries neither of them."
+      - id: b
+        text: "Exemplars need OpenMetrics, and Prometheus keeps them only with `--enable-feature=exemplar-storage`. Native histograms travel in the binary Protocol Buffers format."
+        explanation: "Correct. Each feature needs a format and a setting that carry it."
+      - id: c
+        text: "Native histograms are written as `_bucket` lines with a `native` label."
+        explanation: "A native histogram is one series in the binary format, without `_bucket` lines."
+      - id: d
+        text: "Exemplars replace the `_sum` and `_count` series."
+        explanation: "An exemplar is an example observation attached to a sample. It replaces nothing."
+    correct_option: b
+    explanation: "An exemplar needs OpenMetrics and a server flag. A native histogram needs the binary format."
+
+  - id: ats048-050-q12
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose the correct Pushgateway request method"
+    source_readings:
+      - sections/section-050/module-02/course-03-instrumenting-pushgateway-and-scrape-errors.md
+    prompt: |-
+      A batch job pushes `lab_backup_last_success` to the group `job=backup`. The group also holds `lab_backup_size_bytes`, which must stay. Which request keeps the other metric?
+    options:
+      - id: a
+        text: "`PUT` to `/metrics/job/backup`."
+        explanation: "A `PUT` replaces all metrics of the group, so the other metric is removed."
+      - id: b
+        text: "`DELETE` to `/metrics/job/backup`."
+        explanation: "A `DELETE` removes all metrics of the group."
+      - id: c
+        text: "`POST` to `/metrics/job/backup`."
+        explanation: "Correct. A `POST` replaces only the metrics whose names appear in the push."
+      - id: d
+        text: "`GET` to `/metrics/job/backup`."
+        explanation: "A `GET` does not push data."
+    correct_option: c
+    explanation: "`POST` replaces only the pushed metric names, `PUT` replaces the whole group."
+
+  - id: ats048-050-q13
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Match a scrape error to its cause"
+    source_readings:
+      - sections/section-050/module-02/course-03-instrumenting-pushgateway-and-scrape-errors.md
+      - sections/section-050/module-01/course-03-content-type-and-checking-pages.md
+    prompt: |-
+      The `lastError` of a target reads `context deadline exceeded`. Which cause fits?
+    options:
+      - id: a
+        text: "A label value without quotes on line 12."
+        explanation: "A parse error names a line and a parser message."
+      - id: b
+        text: "The target answers more slowly than the scrape timeout."
+        explanation: "Correct. The request did not finish in time, so the scrape fails before the body is parsed."
+      - id: c
+        text: "The page does not end with `# EOF`."
+        explanation: "That case has its own error text about the end of the data."
+      - id: d
+        text: "The `+Inf` bucket is missing."
+        explanation: "A missing `+Inf` bucket does not fail a scrape."
+    correct_option: b
+    explanation: "`context deadline exceeded` is a timeout, which means the target was too slow."

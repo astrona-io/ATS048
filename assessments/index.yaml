@@ -1,13 +1,36 @@
+---
 schema_version: 1
 course_id: ATS048
 status: draft
 banks:
-- id: ats048-domain-review
-  path: assessments/domain-review.yaml
-  question_count: 15
-  placement:
-    position: after
-    reading: sections/section-050/module-01/course-02-summary.md
+- id: ats048-010
+  path: sections/section-010/quiz.yaml
+  question_count: 19
+  covered_sections:
+  - section-010
+- id: ats048-020
+  path: sections/section-020/quiz.yaml
+  question_count: 17
+  covered_sections:
+  - section-020
+- id: ats048-030
+  path: sections/section-030/quiz.yaml
+  question_count: 14
+  covered_sections:
+  - section-030
+- id: ats048-040
+  path: sections/section-040/quiz.yaml
+  question_count: 14
+  covered_sections:
+  - section-040
+- id: ats048-050
+  path: sections/section-050/quiz.yaml
+  question_count: 13
+  covered_sections:
+  - section-050
+- id: ats048-final
+  path: sections/final-domain-quiz.yaml
+  question_count: 30
   covered_sections:
   - section-010
   - section-020

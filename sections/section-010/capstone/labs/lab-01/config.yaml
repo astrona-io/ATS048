@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Repair Alerting From Rule To Webhook (LAB). Capstone for section 010. Graded against the Prometheus and Alertmanager APIs.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-048-capstone-010
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - quay.io/prometheus/alertmanager:v0.28.1
+      - docker.io/library/python:3.13-alpine
+
+bootstrap:
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+    - resource: deploy/alertmanager
+      namespace: starfleet
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: alertmanager-connected
+      description: Prometheus lists alertmanager:9093 as an active Alertmanager
+      type: file
+      source: validation/validate-alertmanager-connected.sh
+      hint: Compare the port in the alerting block with the port of the Service alertmanager.
+    - name: alert-fires
+      description: LabHighErrorRatio is in the firing state in Prometheus
+      type: file
+      source: validation/validate-alert-fires.sh
+      hint: A rule can be healthy and still never fire. Query the pieces of the expression one by one.
+    - name: alert-in-alertmanager
+      description: Alertmanager holds the alert with severity=page
+      type: file
+      source: validation/validate-alert-in-alertmanager.sh
+      hint: Prometheus sends firing alerts to every configured Alertmanager.
+    - name: webhook-delivered
+      description: The webhook receiver got a notification for LabHighErrorRatio
+      type: file
+      source: validation/validate-webhook-delivered.sh
+      hint: Alertmanager waits group_wait, then posts to the receiver. Allow a short delay.
+
+teardown:
+  keepCluster: false

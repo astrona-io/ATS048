@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Fire An Alert And Reach Alertmanager (LAB). Graded against the live Prometheus and Alertmanager APIs.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-048-lab-010-02-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - quay.io/prometheus/alertmanager:v0.28.1
+      - docker.io/library/python:3.13-alpine
+
+bootstrap:
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+    - resource: deploy/alertmanager
+      namespace: starfleet
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: alertmanager-connected
+      description: Prometheus lists alertmanager:9093 as an active Alertmanager
+      type: file
+      source: validation/validate-alertmanager-connected.sh
+      hint: Add an alerting block with static_configs to prometheus.yaml. The Alertmanager Service is alertmanager on port 9093.
+    - name: alert-rule-defined
+      description: The alerting rule LabHighErrorRatio exists with a 10 second for duration and severity=page
+      type: file
+      source: validation/validate-alert-rule-defined.sh
+      hint: Use alert, expr, for and labels in a rule group in rules.yaml.
+    - name: alert-firing
+      description: LabHighErrorRatio is in the firing state in Prometheus
+      type: file
+      source: validation/validate-alert-firing.sh
+      hint: About ten percent of requests fail, so an expression that tests for more than five percent is true.
+    - name: alert-delivered
+      description: Alertmanager received the alert with the label severity=page
+      type: file
+      source: validation/validate-alert-delivered.sh
+      hint: Prometheus sends firing alerts to every configured Alertmanager. Check the alerting block and restart Prometheus.
+
+teardown:
+  keepCluster: false

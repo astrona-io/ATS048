@@ -1,0 +1,348 @@
+# Knowledge check for section 030. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats048-030
+course_id: ATS048
+exam_code: PCA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-030
+  title: "Understanding Prometheus Limitations"
+questions:
+  - id: ats048-030-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain where a new sample is stored first and what protects it from a crash"
+    source_readings:
+      - sections/section-030/module-01/course-01-local-tsdb-head-wal-and-blocks.md
+    prompt: |-
+      A Prometheus server has just scraped a target. Where does the TSDB store the new sample first, and what lets the server recover it after a crash?
+    options:
+      - id: a
+        text: "The head block in memory, with the write-ahead log on disk replayed at start."
+        explanation: "Correct. The head block holds the newest data in memory, and the WAL records every append so the server can rebuild the head block after a restart."
+      - id: b
+        text: "An immutable block on disk, which the server reads again after a crash."
+        explanation: "Blocks are written later, when the head block is compacted. A new sample is not in a block yet."
+      - id: c
+        text: "A remote storage system that receives a copy of every sample."
+        explanation: "Remote write is optional and is not part of how the TSDB protects the head block."
+      - id: d
+        text: "The Alertmanager, which keeps the last value of every series."
+        explanation: "Alertmanager receives alerts. It does not store samples."
+    correct_option: a
+    explanation: "Correct. The head block holds the newest data in memory, and the WAL records every append so the server can rebuild the head block after a restart."
+
+  - id: ats048-030-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Describe the two retention flags and their defaults"
+    source_readings:
+      - sections/section-030/module-01/course-02-retention-flags-and-query-limits.md
+    prompt: |-
+      A server runs without any retention flag. How long does it keep data, and what does `--storage.tsdb.retention.size` do by default?
+    options:
+      - id: a
+        text: "It keeps 2 hours, and the size limit is 1GB."
+        explanation: "Two hours is the span of the first blocks, not the retention, and there is no default size limit."
+      - id: b
+        text: "It keeps 15 days, and the size limit is off."
+        explanation: "Correct. If neither flag is set, the time retention is 15 days, and the size flag defaults to 0, which disables it."
+      - id: c
+        text: "It keeps data forever, and the size limit is 15GB."
+        explanation: "The server does not keep data forever without a limit. There is a 15 day default and no default size limit."
+      - id: d
+        text: "It keeps 15 days, and the size limit is 15GB."
+        explanation: "The time default is right, but the size limit is off by default."
+    correct_option: b
+    explanation: "Correct. If neither flag is set, the time retention is 15 days, and the size flag defaults to 0, which disables it."
+
+  - id: ats048-030-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain why data can stay longer than the retention time"
+    source_readings:
+      - sections/section-030/module-01/course-02-retention-flags-and-query-limits.md
+    prompt: |-
+      Retention time is set to `6h`. A block on disk covers 10:00 to 12:00. At 18:10, the block is still on disk. What explains this?
+    options:
+      - id: a
+        text: "The retention flag works on single samples, so some samples stay by design."
+        explanation: "Retention works on whole blocks, not on single samples."
+      - id: b
+        text: "The flag was ignored because flags are only a hint."
+        explanation: "Flags are applied exactly. The block has simply not been removed yet."
+      - id: c
+        text: "A block is removed only when the whole block is outside the window, and the cleanup runs in the background and can be late."
+        explanation: "Correct. The block is fully outside the 6 hour window only after 18:00, and the background cleanup can take up to two hours to remove it."
+      - id: d
+        text: "The WAL keeps every block for at least a day."
+        explanation: "The WAL covers only recent head block data and does not keep finished blocks."
+    correct_option: c
+    explanation: "Correct. The block is fully outside the 6 hour window only after 18:00, and the background cleanup can take up to two hours to remove it."
+
+  - id: ats048-030-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose the flags that limit the cost of a single query"
+    source_readings:
+      - sections/section-030/module-01/course-02-retention-flags-and-query-limits.md
+    prompt: |-
+      One dashboard query runs for ten minutes and uses most of the memory of the server. Which pair of flags limits this cost for a single query?
+    options:
+      - id: a
+        text: "`--storage.tsdb.retention.time` and `--storage.tsdb.retention.size`."
+        explanation: "These flags decide when blocks are deleted. They do not limit a query."
+      - id: b
+        text: "`--web.enable-lifecycle` and `--config.file`."
+        explanation: "These flags set the reload endpoint and the configuration path."
+      - id: c
+        text: "`sample_limit` and `target_limit`."
+        explanation: "These are scrape job settings. They limit what is scraped, not the cost of a query."
+      - id: d
+        text: "`--query.timeout` and `--query.max-samples`."
+        explanation: "Correct. The timeout stops a query that runs too long, and the sample limit fails a query that would hold too many samples in memory."
+    correct_option: d
+    explanation: "Correct. The timeout stops a query that runs too long, and the sample limit fails a query that would hold too many samples in memory."
+
+  - id: ats048-030-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain what a high availability pair of Prometheus servers provides"
+    source_readings:
+      - sections/section-030/module-01/course-03-single-node-cardinality-and-ha-pairs.md
+    prompt: |-
+      Two identical Prometheus servers scrape the same targets. What does this setup give you?
+    options:
+      - id: a
+        text: "Protection against the failure of one server, with duplicate alerts that Alertmanager merges."
+        explanation: "Correct. Each server holds its own data and sends alerts. The pair adds no capacity and no shared database."
+      - id: b
+        text: "Twice the capacity, because the servers share the series between them."
+        explanation: "Each server stores all data, so the capacity of the pair equals the capacity of one server."
+      - id: c
+        text: "One shared database that both servers read and write."
+        explanation: "The two TSDBs are separate and the servers do not exchange samples."
+      - id: d
+        text: "Durable history even if both servers lose their disks."
+        explanation: "Both servers store locally. Durable history needs storage outside Prometheus."
+    correct_option: a
+    explanation: "Correct. Each server holds its own data and sends alerts. The pair adds no capacity and no shared database."
+
+  - id: ats048-030-q06
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Choose how to avoid double counting with two replicas"
+    source_readings:
+      - sections/section-030/module-01/course-03-single-node-cardinality-and-ha-pairs.md
+    prompt: |-
+      A tool merges the data of two replicas that differ in the label `replica`. `sum(rate(lab_requests_total[5m]))` returns about twice the real value. What is the correct fix?
+    options:
+      - id: a
+        text: "Add a third replica to compute the median."
+        explanation: "A third replica adds more copies and does not remove the duplicates."
+      - id: b
+        text: "Set `sample_limit` to half of the series count."
+        explanation: "The sample limit fails scrapes and does not remove duplicates in a query."
+      - id: c
+        text: "Query one replica only, or aggregate the `replica` label away with an operator such as `max without (replica)`."
+        explanation: "Correct. Each replica has a copy of every series, so a sum over both counts every request twice."
+      - id: d
+        text: "Raise `--query.max-samples` so the query can count both copies."
+        explanation: "The limit does not change the double counting."
+    correct_option: c
+    explanation: "Correct. Each replica has a copy of every series, so a sum over both counts every request twice."
+
+  - id: ats048-030-q07
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Relate cardinality to memory"
+    source_readings:
+      - sections/section-030/module-01/course-03-single-node-cardinality-and-ha-pairs.md
+    prompt: |-
+      A developer adds the label `request_id` to a request counter. What is the main effect on the Prometheus server?
+    options:
+      - id: a
+        text: "The counter becomes more accurate, because each request gets its own value."
+        explanation: "The label does not add accuracy. It only adds series."
+      - id: b
+        text: "Nothing changes, because labels are not stored."
+        explanation: "Labels are part of the identity of a series and are stored."
+      - id: c
+        text: "The retention time of the metric becomes shorter."
+        explanation: "Retention does not depend on labels. The cost is in memory and disk."
+      - id: d
+        text: "Every new value creates a new series, so memory use in the head block grows with the number of requests."
+        explanation: "Correct. Each unique label combination is a separate series with its own entry in the head block."
+    correct_option: d
+    explanation: "Correct. Each unique label combination is a separate series with its own entry in the head block."
+
+  - id: ats048-030-q08
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Decide which question needs logs or traces and not metrics"
+    source_readings:
+      - sections/section-030/module-02/course-01-metrics-versus-logs-traces-and-exact-accounting.md
+    prompt: |-
+      Which question is the least suited to Prometheus?
+    options:
+      - id: a
+        text: "What is the error rate of the `probe` over the last five minutes?"
+        explanation: "This is the kind of question metrics answer well."
+      - id: b
+        text: "Why did the request with identifier `a1b2` return status 500?"
+        explanation: "Correct. A metric summarises many events and cannot show one request. A log line or a trace answers this question."
+      - id: c
+        text: "Is the memory use of a node above 90 percent?"
+        explanation: "A gauge answers this well."
+      - id: d
+        text: "How did the request rate change since yesterday?"
+        explanation: "A counter with `rate()` answers this well."
+    correct_option: b
+    explanation: "Correct. A metric summarises many events and cannot show one request. A log line or a trace answers this question."
+
+  - id: ats048-030-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain why increase() can return a fractional value"
+    source_readings:
+      - sections/section-030/module-02/course-01-metrics-versus-logs-traces-and-exact-accounting.md
+    prompt: |-
+      A counter only grows in whole numbers, but `increase(lab_requests_total[1m])` returns 4.37. Why?
+    options:
+      - id: a
+        text: "The counter is stored as a floating point average."
+        explanation: "The stored values are the scraped counter values."
+      - id: b
+        text: "The server lost 0.63 of a request during compaction."
+        explanation: "Compaction does not change values."
+      - id: c
+        text: "The scrape interval is not a whole number of seconds."
+        explanation: "The extrapolation happens for any interval and does not depend on this."
+      - id: d
+        text: "Prometheus extrapolates from the first and last sample in the window to the window edges."
+        explanation: "Correct. The samples rarely align with the window edges, so the function extends the slope, and the result can have decimals."
+    correct_option: d
+    explanation: "Correct. The samples rarely align with the window edges, so the function extends the slope, and the result can have decimals."
+
+  - id: ats048-030-q10
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain how gaps, up and staleness relate"
+    source_readings:
+      - sections/section-030/module-02/course-02-pull-model-staleness-long-term-storage-and-alert-delivery.md
+    prompt: |-
+      A graph of a metric shows a gap for ten minutes. Which series tells you whether the target could not be scraped?
+    options:
+      - id: a
+        text: "`up`, which is 0 when the scrape failed."
+        explanation: "Correct. The server writes `up` for every scrape, so a value of 0 separates a failed scrape from a target with no data."
+      - id: b
+        text: "`prometheus_tsdb_head_series`, which drops to 0 during a gap."
+        explanation: "This metric counts series in the head block. It does not report scrape results."
+      - id: c
+        text: "`scrape_interval`, which is stored as a series for each target."
+        explanation: "The scrape interval is a configuration value and not a series."
+      - id: d
+        text: "`ALERTS`, which always shows the cause of a gap."
+        explanation: "`ALERTS` shows pending and firing alerts and does not explain a gap."
+    correct_option: a
+    explanation: "Correct. The server writes `up` for every scrape, so a value of 0 separates a failed scrape from a target with no data."
+
+  - id: ats048-030-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain remote write and what it does not change"
+    source_readings:
+      - sections/section-030/module-02/course-02-pull-model-staleness-long-term-storage-and-alert-delivery.md
+    prompt: |-
+      The team needs one year of data. Which statement about `remote_write` is correct?
+    options:
+      - id: a
+        text: "It turns Prometheus into a cluster with shared storage."
+        explanation: "Prometheus has no clustering and remote write does not add it."
+      - id: b
+        text: "Prometheus sends a copy of each sample to a separate system, and the local database keeps its own retention."
+        explanation: "Correct. Remote write adds long-term storage outside the server. The local TSDB stays single-node with its own retention."
+      - id: c
+        text: "It raises the local retention to the limit of the remote system."
+        explanation: "Local retention is set by the flags and does not change."
+      - id: d
+        text: "It guarantees that no sample is ever lost."
+        explanation: "The queue can fall behind if the remote system is down for long, and samples can be dropped."
+    correct_option: b
+    explanation: "Correct. Remote write adds long-term storage outside the server. The local TSDB stays single-node with its own retention."
+
+  - id: ats048-030-q12
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Explain the delivery path and failure points of alerts"
+    source_readings:
+      - sections/section-030/module-02/course-02-pull-model-staleness-long-term-storage-and-alert-delivery.md
+    prompt: |-
+      The Prometheus server crashes at night while a real fault happens. No alert arrives. Which design best detects this kind of silent failure?
+    options:
+      - id: a
+        text: "Add an alert on the same server that fires when the server is down."
+        explanation: "A server that is down does not evaluate any rule, so it cannot send this alert."
+      - id: b
+        text: "Raise `--query.timeout` so that rules always finish."
+        explanation: "The timeout does not affect whether the server runs."
+      - id: c
+        text: "Set a `sample_limit` on the Alertmanager job."
+        explanation: "The limit controls samples of a scrape, not alert delivery."
+      - id: d
+        text: "Run an HA pair and add an always-firing watchdog alert that an external service watches."
+        explanation: "Correct. If the watchdog alert stops arriving, the external service raises its own alarm. The pair reduces the chance that both servers fail."
+    correct_option: d
+    explanation: "Correct. If the watchdog alert stops arriving, the external service raises its own alarm. The pair reduces the chance that both servers fail."
+
+  - id: ats048-030-q13
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Predict what happens when sample_limit is exceeded"
+    source_readings:
+      - sections/section-030/module-02/course-03-protecting-the-server-with-sample-and-label-limits.md
+    prompt: |-
+      The job `crowded` has `sample_limit: 100` and its target returns 200 samples. What does Prometheus store from that scrape?
+    options:
+      - id: a
+        text: "The first 100 samples. The others are dropped."
+        explanation: "Prometheus does not truncate. A partial result would look like a working target."
+      - id: b
+        text: "Nothing from the target. The scrape is failed and `up` is 0."
+        explanation: "Correct. When the limit is exceeded, the entire scrape is treated as failed, and Prometheus stores none of its samples."
+      - id: c
+        text: "All 200 samples, together with a warning in the log."
+        explanation: "The limit is enforced and the samples are not stored."
+      - id: d
+        text: "100 samples chosen at random."
+        explanation: "Prometheus never chooses a subset."
+    correct_option: b
+    explanation: "Correct. When the limit is exceeded, the entire scrape is treated as failed, and Prometheus stores none of its samples."
+
+  - id: ats048-030-q14
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Set limits after relabeling and choose a safe value"
+    source_readings:
+      - sections/section-030/module-02/course-03-protecting-the-server-with-sample-and-label-limits.md
+    prompt: |-
+      A target normally returns 400 samples. A `metric_relabel_configs` rule drops 150 of them. Which `sample_limit` fits with a reasonable margin?
+    options:
+      - id: a
+        text: "About 100, because that is a quarter of the raw size."
+        explanation: "This limit is below the normal size and would fail every scrape."
+      - id: b
+        text: "0, because it means a safe default."
+        explanation: "0 means no limit."
+      - id: c
+        text: "About 500, because the limit counts samples after metric relabeling (250) with a margin."
+        explanation: "Correct. The limit is checked after metric relabeling, so the normal size is 250, and a limit of about twice that leaves room to grow without allowing unbounded growth."
+      - id: d
+        text: "About 400, because the limit counts the samples before relabeling."
+        explanation: "The limit counts samples after metric relabeling."
+    correct_option: c
+    explanation: "Correct. The limit is checked after metric relabeling, so the normal size is 250, and a limit of about twice that leaves room to grow without allowing unbounded growth."

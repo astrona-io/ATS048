@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
+# Applies the reference solution. Run only by `astrona test`.
 set -euo pipefail
-if [[ "$(kubectl config current-context)" != "kind-astro-ats-048-lab-030-01-01" ]]; then
-  printf 'Refusing to operate on another Kubernetes context\n' >&2
-  exit 1
-fi
-lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-solution_directory="$lab_directory/solution"
-node_name="astro-ats-048-lab-030-01-01-control-plane"
-worker_name="astro-ats-048-lab-030-01-01-worker"
 
-python3 "$solution_directory/record.py"
+kubectl -n starfleet patch deployment prometheus --type=json -p '[
+  {"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--storage.tsdb.retention.time=6h"},
+  {"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--storage.tsdb.retention.size=500MB"},
+  {"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--query.timeout=30s"},
+  {"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--query.max-samples=10000000"}
+]'
+kubectl -n starfleet rollout status deployment/prometheus --timeout=180s
+sleep 20
+echo "[solution] Applied."

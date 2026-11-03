@@ -1,37 +1,16 @@
----
-draft: true
-exam_objectives:
-- Understanding Prometheus Limitations
----
-# Inspect TSDB Head Series
+# Question
 
-Evaluate the required expression and preserve its labels, values and evaluation time.
+Solve this question on: `terminal`
 
-## Starting state
+Prometheus runs as the Deployment `prometheus` in `starfleet`, with its data on an `emptyDir` volume. It uses the default retention and the default query limits. The platform team wants bounded storage and bounded queries.
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
+Change the `prometheus` container of the Deployment so that the server starts with these additional flags. Keep every flag that is already there.
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+1. Keep sample data for at most 6 hours.
+2. Also cap the disk space used by blocks at 500MB.
+3. Stop queries that run longer than 30 seconds.
+4. Reject queries that would load more than 10000000 samples into memory.
 
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-048-lab-030-01-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-048-lab-030-01-01" || exit 1
-node_name="astro-ats-048-lab-030-01-01-control-plane"
-worker_name="astro-ats-048-lab-030-01-01-worker"
-```
+Prometheus reads flags only at start, so the new pod must be running before you submit. Do not change the scrape configuration.
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
-
-## Required result
-
-Inspect the live storage metric and explain why head series count differs from sample retention. Storage is disposable emptyDir: no high availability or durable recovery is exercised.
-
-Use the expression `prometheus_tsdb_head_series`. The report needs `expression`, `evaluated_at` and `data`. Data is the Prometheus API data object, not only the printed value. Wait for at least twenty seconds of collected traffic before using a rate. Record evidence within five minutes of submission. Changing the expression or claiming an empty result fails.
-
-Record observations in `starfleet/evidence`, whose `report.json` contains the stated report. The verifier reads the live API again; invented values do not pass.
-
-The report object uses these fields: `expression`, `evaluated_at`, `data`. Keep numeric values numeric and preserve arrays and nested objects returned by the API.
-
-## Verify The Result
-
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+`kubectl` already points at the cluster as the cluster administrator.

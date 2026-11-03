@@ -1,0 +1,418 @@
+# Knowledge check for section 020. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats048-020
+course_id: ATS048
+exam_code: PCA
+status: draft
+provenance: Original practice material written for this course; not official exam
+  questions.
+scope:
+  type: section
+  id: section-020
+  title: Configuration and Scraping
+questions:
+- id: ats048-020-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain which rule links scrape interval and scrape timeout
+  source_readings:
+  - sections/section-020/module-01/course-01-global-defaults-and-scrape-jobs.md
+  prompt: 'A job sets `scrape_interval: 5s` and nothing else, while `global` has `scrape_timeout:
+    10s`. What happens when Prometheus loads the file?'
+  options:
+  - id: a
+    text: Prometheus loads it and uses a timeout of 5 seconds.
+    explanation: Prometheus does not shorten the timeout by itself.
+  - id: b
+    text: Prometheus rejects the file, because the inherited timeout is larger than
+      the interval.
+    explanation: Correct. The timeout cannot be greater than the interval, and the
+      check runs after inheritance.
+  - id: c
+    text: Prometheus loads it and scrapes every 10 seconds.
+    explanation: The job value for the interval is used as written.
+  - id: d
+    text: Prometheus loads it and ignores the job interval.
+    explanation: A job value overrides the global value.
+  correct_option: b
+  explanation: A scrape timeout greater than the scrape interval is invalid, also
+    when the timeout is inherited from the global section.
+- id: ats048-020-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Build the scrape URL from scheme, address and metrics path
+  source_readings:
+  - sections/section-020/module-01/course-01-global-defaults-and-scrape-jobs.md
+  prompt: A job has `static_configs` with the target `probe:8080` and no other settings.
+    Which URL does Prometheus request?
+  options:
+  - id: a
+    text: "`http://probe:9090/metrics`"
+    explanation: The port comes from the target address.
+  - id: b
+    text: "`https://probe:8080/metrics`"
+    explanation: The default scheme is `http`.
+  - id: c
+    text: "`http://probe:8080/metrics`"
+    explanation: Correct. The defaults are the scheme `http` and the path `/metrics`.
+  - id: d
+    text: "`http://probe:8080/`"
+    explanation: The default path is `/metrics`, not `/`.
+  correct_option: c
+  explanation: The URL is built from the scheme, the address in targets and the metrics
+    path.
+- id: ats048-020-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Tell evaluation_interval from scrape_interval
+  source_readings:
+  - sections/section-020/module-01/course-01-global-defaults-and-scrape-jobs.md
+  prompt: 'The `global` section sets `evaluation_interval: 30s` and `scrape_interval:
+    5s`. What does the evaluation interval control?'
+  options:
+  - id: a
+    text: How long a scrape may take.
+    explanation: That is the scrape timeout.
+  - id: b
+    text: How long samples are kept.
+    explanation: Retention is a separate server flag.
+  - id: c
+    text: How often targets are scraped.
+    explanation: That is the scrape interval.
+  - id: d
+    text: How often the rule manager evaluates recording and alerting rules.
+    explanation: Correct. The two clocks are independent.
+  correct_option: d
+  explanation: The evaluation interval applies to rule groups only.
+- id: ats048-020-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain where job and instance labels come from
+  source_readings:
+  - sections/section-020/module-01/course-02-job-instance-labels-and-scrape-health.md
+  prompt: Which labels does Prometheus attach to every sample scraped from the job
+    `probe` with the target `probe:8080`, when no rule sets them?
+  options:
+  - id: a
+    text: '`job="probe:8080"` and `instance="probe"`'
+    explanation: The two values are swapped.
+  - id: b
+    text: Only `job="probe"`
+    explanation: The instance label is attached too.
+  - id: c
+    text: '`app="probe"` and `host="probe"`'
+    explanation: Prometheus does not attach labels with these names.
+  - id: d
+    text: '`job="probe"` and `instance="probe:8080"`'
+    explanation: Correct. The job label is the job name and the instance label is
+      the target address.
+  correct_option: d
+  explanation: Prometheus attaches job from the job name and instance from the address
+    of the target.
+- id: ats048-020-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain a label put on a target group
+  source_readings:
+  - sections/section-020/module-01/course-02-job-instance-labels-and-scrape-health.md
+  prompt: 'A target group is written with `labels: {env: lab}` and the target `probe:8080`.
+    Where does the label `env` appear?'
+  options:
+  - id: a
+    text: Only on the series `up`.
+    explanation: It appears on all series of the target.
+  - id: b
+    text: On every series scraped from the targets of that group, including the automatic
+      series.
+    explanation: Correct. Target group labels are part of the target and reach every
+      series.
+  - id: c
+    text: On the Prometheus server as an external label only.
+    explanation: External labels are a different setting in the global section.
+  - id: d
+    text: On old samples that were stored before the change.
+    explanation: Stored samples do not change.
+  correct_option: b
+  explanation: Labels of a target group are attached to the target before the scrape
+    and appear on all its series.
+- id: ats048-020-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Interpret the up series
+  source_readings:
+  - sections/section-020/module-01/course-02-job-instance-labels-and-scrape-health.md
+  prompt: The series `up{job="probe"}` has the value 0. What does this prove?
+  options:
+  - id: a
+    text: The configuration was not loaded.
+    explanation: A loaded configuration is shown by the reload metric.
+  - id: b
+    text: The application process has crashed.
+    explanation: The scrape can fail for other reasons, such as a wrong path or a
+      timeout.
+  - id: c
+    text: The last scrape of the target failed.
+    explanation: Correct. The reason is in `lastError` in the targets API.
+  - id: d
+    text: The target returned too many samples.
+    explanation: That would show in `scrape_samples_scraped`.
+  correct_option: c
+  explanation: The value of up describes the scrape, not the health of the application.
+- id: ats048-020-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain honor_labels
+  source_readings:
+  - sections/section-020/module-01/course-02-job-instance-labels-and-scrape-health.md
+  prompt: 'A scraped sample has the label `job="batch"`, and the target has `job="probe"`.
+    With the default `honor_labels: false`, what is stored?'
+  options:
+  - id: a
+    text: '`job="probe;batch"`'
+    explanation: Prometheus does not join the values.
+  - id: b
+    text: The sample is rejected.
+    explanation: A conflict does not reject the sample.
+  - id: c
+    text: '`job="batch"` only'
+    explanation: 'That is the result of `honor_labels: true`.'
+  - id: d
+    text: '`job="probe"` and `exported_job="batch"`'
+    explanation: Correct. The target label wins and the scraped label is renamed.
+  correct_option: d
+  explanation: With honor_labels false, the scraped label gets the prefix exported_.
+- id: ats048-020-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Reload and validate configuration
+  source_readings:
+  - sections/section-020/module-01/course-03-validating-and-reloading-the-configuration.md
+  prompt: Which statement about reloading is correct?
+  options:
+  - id: a
+    text: A reload happens on SIGHUP or on a POST to `/-/reload` when `--web.enable-lifecycle`
+      is set.
+    explanation: Correct. Both requests trigger the same reload.
+  - id: b
+    text: A GET request to `/-/reload` triggers a reload.
+    explanation: The endpoint needs POST.
+  - id: c
+    text: Reload needs a restart of the process.
+    explanation: The process keeps running during a reload.
+  - id: d
+    text: Prometheus watches the file and reloads it by itself.
+    explanation: It reloads only on a request.
+  correct_option: a
+  explanation: Reload is triggered by SIGHUP or an HTTP POST to the lifecycle endpoint.
+- id: ats048-020-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain what happens on a failed reload
+  source_readings:
+  - sections/section-020/module-01/course-03-validating-and-reloading-the-configuration.md
+  prompt: A reload request contains a file with an invalid value. What happens?
+  options:
+  - id: a
+    text: The server stops.
+    explanation: The server keeps running.
+  - id: b
+    text: The server applies the valid part of the file.
+    explanation: The file is rejected as a whole.
+  - id: c
+    text: The server keeps the old configuration, and `prometheus_config_last_reload_successful`
+      becomes 0.
+    explanation: Correct. The error goes to the log and the previous configuration
+      stays in force.
+  - id: d
+    text: The server loads an empty configuration.
+    explanation: It never falls back to an empty configuration.
+  correct_option: c
+  explanation: An invalid file is rejected and the old configuration stays in force.
+- id: ats048-020-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Know the limit of promtool check config
+  source_readings:
+  - sections/section-020/module-01/course-03-validating-and-reloading-the-configuration.md
+  prompt: The command `promtool check config` succeeds for a file with the target
+    `probe:8081`, but nothing listens on that port. Why?
+  options:
+  - id: a
+    text: The port 8081 is always valid.
+    explanation: The port value is valid but not reachable.
+  - id: b
+    text: The check contacts the target and accepts any answer.
+    explanation: The check does not make network requests to targets.
+  - id: c
+    text: The check validates syntax and values of the file only, not reachability.
+    explanation: Correct. A wrong port is found by the scrape, not by the check.
+  - id: d
+    text: The check ignores the `scrape_configs` section.
+    explanation: It parses the whole file.
+  correct_option: c
+  explanation: promtool checks the shape of the file and not the network.
+- id: ats048-020-q11
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Use file-based service discovery
+  source_readings:
+  - sections/section-020/module-02/course-01-service-discovery-and-target-labels.md
+  prompt: What is the main advantage of `file_sd_configs` over `static_configs`?
+  options:
+  - id: a
+    text: It needs no labels.
+    explanation: Target groups in files can have labels.
+  - id: b
+    text: It stores samples for longer.
+    explanation: Retention is not related to discovery.
+  - id: c
+    text: It scrapes faster.
+    explanation: Both scrape in the same way.
+  - id: d
+    text: Another tool can change the targets in files, and Prometheus follows without
+      a reload of the main file.
+    explanation: Correct. The files are watched and re-read.
+  correct_option: d
+  explanation: File-based discovery lets external tools update the target list.
+- id: ats048-020-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Read the labels before and after relabeling
+  source_readings:
+  - sections/section-020/module-02/course-01-service-discovery-and-target-labels.md
+  prompt: What happens to the label `__meta_kubernetes_pod_name` of a target if no
+    rule copies it?
+  options:
+  - id: a
+    text: It is removed after relabeling and never reaches storage.
+    explanation: Correct. A rule must copy it into a normal label.
+  - id: b
+    text: It becomes the `instance` label.
+    explanation: The instance label comes from `__address__`.
+  - id: c
+    text: It becomes the `job` label.
+    explanation: The job label is the job name.
+  - id: d
+    text: It is stored on every series.
+    explanation: Labels that start with two underscores are removed after relabeling.
+  correct_option: a
+  explanation: Internal and meta labels exist only during relabeling.
+- id: ats048-020-q13
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Choose between the two relabeling lists
+  source_readings:
+  - sections/section-020/module-02/course-03-metric-relabeling-and-honor-labels.md
+  prompt: You want to stop storing the metric `lab_queue_depth` and keep every other
+    metric of the job. Where does the rule belong?
+  options:
+  - id: a
+    text: In `relabel_configs`, with the source label `__name__`.
+    explanation: That list runs on targets before the scrape and sees no metric names.
+  - id: b
+    text: In `metric_relabel_configs`, with the action `drop` and `__name__` as source
+      label.
+    explanation: Correct. This list runs on every sample before storage.
+  - id: c
+    text: In the `global` section.
+    explanation: The global section has no relabeling.
+  - id: d
+    text: In `file_sd_configs`.
+    explanation: Discovery does not filter samples.
+  correct_option: b
+  explanation: Metric names exist only in samples, so the rule belongs in the list
+    that runs after the scrape.
+- id: ats048-020-q14
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Know that relabel regular expressions are anchored
+  source_readings:
+  - sections/section-020/module-02/course-03-metric-relabeling-and-honor-labels.md
+  prompt: 'A drop rule has `source_labels: [__name__]` and `regex: lab_queue`. The
+    application exposes `lab_queue_depth`. What happens?'
+  options:
+  - id: a
+    text: All metrics of the job are dropped.
+    explanation: Only matching samples are dropped.
+  - id: b
+    text: The metric is dropped.
+    explanation: The regex does not cover the whole name.
+  - id: c
+    text: The metric is kept, because the regular expression must match the whole
+      value.
+    explanation: Correct. Use the full name or `lab_queue.*`.
+  - id: d
+    text: Prometheus rejects the file.
+    explanation: The expression is valid.
+  correct_option: c
+  explanation: Relabel regular expressions are anchored.
+- id: ats048-020-q15
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Predict the effect of writing instance in relabel_configs
+  source_readings:
+  - sections/section-020/module-02/course-02-relabel-configs-before-the-scrape.md
+  prompt: 'A rule in `relabel_configs` has `target_label: instance` and `replacement:
+    probe-main`, with no source labels. What happens to the scrape URL?'
+  options:
+  - id: a
+    text: The scrape fails.
+    explanation: The target is still scraped from its address.
+  - id: b
+    text: The target is dropped.
+    explanation: Only `drop` and `keep` remove targets.
+  - id: c
+    text: It becomes `http://probe-main/metrics`.
+    explanation: The address was not changed.
+  - id: d
+    text: It does not change. Only the label `instance` has a new value.
+    explanation: Correct. The URL comes from `__address__`.
+  correct_option: d
+  explanation: Prometheus connects to __address__, and instance is only a label.
+- id: ats048-020-q16
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Name the relabel actions
+  source_readings:
+  - sections/section-020/module-02/course-02-relabel-configs-before-the-scrape.md
+  prompt: Which action copies labels whose names match a regular expression to new
+    label names, for example turning pod labels into normal labels?
+  options:
+  - id: a
+    text: "`labeldrop`"
+    explanation: It removes labels by name.
+  - id: b
+    text: "`keep`"
+    explanation: It keeps or drops targets or samples.
+  - id: c
+    text: "`hashmod`"
+    explanation: It computes a hash modulus for sharding.
+  - id: d
+    text: "`labelmap`"
+    explanation: Correct. `labelmap` copies matching label names using the replacement.
+  correct_option: d
+  explanation: labelmap maps label names to new names.
+- id: ats048-020-q17
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Use metrics_path and params
+  source_readings:
+  - sections/section-020/module-02/course-02-relabel-configs-before-the-scrape.md
+  prompt: 'A job sets `metrics_path: /probe` and `params: {module: [http_2xx]}`. Which
+    URL path and query does Prometheus request?'
+  options:
+  - id: a
+    text: "`/metrics?module=http_2xx`"
+    explanation: The path is set by `metrics_path`.
+  - id: b
+    text: "`/probe?module=http_2xx`"
+    explanation: Correct. The params become a query string.
+  - id: c
+    text: "`/probe` without a query"
+    explanation: Parameters are added to the URL.
+  - id: d
+    text: "`/module/http_2xx`"
+    explanation: Parameters are not added to the path.
+  correct_option: b
+  explanation: The metrics path and the URL parameters build the request.

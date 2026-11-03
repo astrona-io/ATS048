@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: starfleet
+data:
+  rules.yaml: |
+    groups:
+    - name: lab_types
+      interval: 5s
+      rules:
+      - record: status:lab_requests:rate1m
+        expr: sum by (status) (rate(lab_requests_total[1m]))
+      - record: lab:request_duration_seconds:p95
+        expr: histogram_quantile(0.95, sum by (le) (rate(lab_request_duration_seconds_bucket[1m])))
+      - record: lab:queue_depth:max
+        expr: max(lab_queue_depth)

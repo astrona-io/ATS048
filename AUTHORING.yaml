@@ -1,5 +1,7 @@
+---
 version: 1
-approval: PCA requested 2026-10-11; established reading-only scope
+approval: Maintainer requested PCA, CCA and CAPA playgrounds and graded labs on 2026-10-13,
+  superseding the earlier reading-only scope.
 course:
   id: ATS048
   certification:
@@ -15,110 +17,201 @@ course:
     - Data Model and Labels
     - Exposition Format
 defaults:
-  playground: false
-  module_lab: false
-  capstone: false
-  section_quiz: false
+  playground: true
+  module_lab: true
+  capstone: true
+  section_quiz: true
   final_quiz: true
-assessment_format: YAML question banks v1, registered in assessments/index.yaml
+assessment_format: YAML question banks v1, registered in assessments/index.yaml and
+  astrona.yaml
 sections:
 - id: section-010
   title: System Architecture
   curriculum_item: System Architecture
-  capstone: false
-  section_quiz: false
+  capstone:
+    path: sections/section-010/capstone/labs/lab-01
+    title: Repair Alerting From Rule To Webhook
+    status: draft
+    runtime_verification: pending
+  section_quiz: sections/section-010/quiz.yaml
   modules:
   - id: module-01
-    title: The Prometheus Collection, Storage And Rule Pipeline
-    objectives:
-    - Trace samples from exposition through scraping and local storage.
-    - Distinguish query, recording-rule and alert-rule responsibilities.
-    - Explain Alertmanager's notification role.
-    - Identify separate failures in collection, processing and remote delivery.
-    outline:
-    - The Prometheus Collection, Storage And Rule Pipeline
-    playground: false
-    module_lab: false
-    sources:
-    - reading: sections/section-010/module-01/course-01-the-prometheus-collection-storage-and-rule-pipeline.md
-      adapted_from: null
+    title: The Prometheus Collection, Storage And Query Pipeline
+    playground: true
+    module_lab: true
+    readings:
+    - sections/section-010/module-01/course-01-scrape-pipeline-and-targets.md
+    - sections/section-010/module-01/course-02-tsdb-storage-and-querying.md
+    - sections/section-010/module-01/course-03-recording-rules.md
+    labs:
+    - id: lab-01
+      path: sections/section-010/module-01/labs/lab-01
+      title: Record Derived Series In A Rule File
+      status: draft
+      runtime_verification: pending
+  - id: module-02
+    title: Alerting And Extension Architecture
+    playground: true
+    module_lab: true
+    readings:
+    - sections/section-010/module-02/course-01-alerting-rules-and-alert-states.md
+    - sections/section-010/module-02/course-02-alertmanager-routing-and-suppression.md
+    - sections/section-010/module-02/course-03-extension-architecture.md
+    labs:
+    - id: lab-01
+      path: sections/section-010/module-02/labs/lab-01
+      title: Fire An Alert And Reach Alertmanager
+      status: draft
+      runtime_verification: pending
 - id: section-020
   title: Configuration and Scraping
   curriculum_item: Configuration and Scraping
-  capstone: false
-  section_quiz: false
+  capstone:
+    path: sections/section-020/capstone/labs/lab-01
+    title: Repair Scrape Jobs And Shape The Stored Series
+    status: draft
+    runtime_verification: pending
+  section_quiz: sections/section-020/quiz.yaml
   modules:
   - id: module-01
-    title: Scrape Timing, Target Labels And Failure Evidence
-    objectives:
-    - Interpret global defaults and per-job scrape settings.
-    - Distinguish timeout, interval and rule evaluation timing.
-    - Explain job, instance and exporter-label conflicts.
-    - Diagnose a failed scrape without equating it with application downtime.
-    outline:
-    - Scrape Timing, Target Labels And Failure Evidence
-    playground: false
-    module_lab: false
-    sources:
-    - reading: sections/section-020/module-01/course-01-scrape-timing-target-labels-and-failure-evidence.md
-      adapted_from: null
+    title: The Prometheus Configuration File
+    playground: true
+    module_lab: true
+    readings:
+    - sections/section-020/module-01/course-01-global-defaults-and-scrape-jobs.md
+    - sections/section-020/module-01/course-02-job-instance-labels-and-scrape-health.md
+    - sections/section-020/module-01/course-03-validating-and-reloading-the-configuration.md
+    labs:
+    - id: lab-01
+      path: sections/section-020/module-01/labs/lab-01
+      title: Repair And Tune A Scrape Job
+      status: draft
+      runtime_verification: pending
+  - id: module-02
+    title: Service Discovery And Relabeling
+    playground: true
+    module_lab: true
+    readings:
+    - sections/section-020/module-02/course-01-service-discovery-and-target-labels.md
+    - sections/section-020/module-02/course-02-relabel-configs-before-the-scrape.md
+    - sections/section-020/module-02/course-03-metric-relabeling-and-honor-labels.md
+    labs:
+    - id: lab-01
+      path: sections/section-020/module-02/labs/lab-01
+      title: Rewrite Labels And Drop A Metric With Relabeling
+      status: draft
+      runtime_verification: pending
 - id: section-030
   title: Understanding Prometheus Limitations
   curriculum_item: Understanding Prometheus Limitations
-  capstone: false
-  section_quiz: false
+  capstone:
+    path: sections/section-030/capstone/labs/lab-01
+    title: Bound The Server Storage And A Crowded Target
+    status: draft
+    runtime_verification: pending
+  section_quiz: sections/section-030/quiz.yaml
   modules:
   - id: module-01
-    title: Prometheus Storage, Scale And Evidence Limits
-    objectives:
-    - Explain scrape gaps and why metrics are not a transaction ledger.
-    - Relate cardinality, retention and query scope to resource cost.
-    - Distinguish local storage from remote storage and replication.
-    - Evaluate monitoring dependencies and failure evidence.
-    outline:
-    - Prometheus Storage, Scale And Evidence Limits
-    playground: false
-    module_lab: false
-    sources:
-    - reading: sections/section-030/module-01/course-01-prometheus-storage-scale-and-evidence-limits.md
-      adapted_from: null
+    title: Prometheus Storage And Scale
+    playground: true
+    module_lab: true
+    readings:
+    - sections/section-030/module-01/course-01-local-tsdb-head-wal-and-blocks.md
+    - sections/section-030/module-01/course-02-retention-flags-and-query-limits.md
+    - sections/section-030/module-01/course-03-single-node-cardinality-and-ha-pairs.md
+    labs:
+    - id: lab-01
+      path: sections/section-030/module-01/labs/lab-01
+      title: Set Retention And Query Limits On The Server
+      status: draft
+      runtime_verification: pending
+  - id: module-02
+    title: What Prometheus Is Not For
+    playground: true
+    module_lab: true
+    readings:
+    - sections/section-030/module-02/course-01-metrics-versus-logs-traces-and-exact-accounting.md
+    - sections/section-030/module-02/course-02-pull-model-staleness-long-term-storage-and-alert-delivery.md
+    - sections/section-030/module-02/course-03-protecting-the-server-with-sample-and-label-limits.md
+    labs:
+    - id: lab-01
+      path: sections/section-030/module-02/labs/lab-01
+      title: Protect The Server From A High-Cardinality Target
+      status: draft
+      runtime_verification: pending
 - id: section-040
   title: Data Model and Labels
   curriculum_item: Data Model and Labels
-  capstone: false
-  section_quiz: false
+  capstone:
+    path: sections/section-040/capstone/labs/lab-01
+    title: Record Rate, Aggregation And Percentile Series
+    status: draft
+    runtime_verification: pending
+  section_quiz: sections/section-040/quiz.yaml
   modules:
   - id: module-01
-    title: Series Identity, Label Cardinality And Staleness
-    objectives:
-    - Explain how metric names and labels identify a time series.
-    - Distinguish missing labels, empty labels and matcher behavior.
-    - Relate changing labels to churn and historical continuity.
-    - Explain absent samples and staleness without substituting zero automatically.
-    outline:
-    - Series Identity, Label Cardinality And Staleness
-    playground: false
-    module_lab: false
-    sources:
-    - reading: sections/section-040/module-01/course-01-series-identity-label-cardinality-and-staleness.md
-      adapted_from: null
+    title: Time Series, Samples And Metric Types
+    playground: true
+    module_lab: true
+    readings:
+    - sections/section-040/module-01/course-01-series-samples-names-and-labels.md
+    - sections/section-040/module-01/course-02-counters-and-gauges.md
+    - sections/section-040/module-01/course-03-histograms-and-summaries.md
+    labs:
+    - id: lab-01
+      path: sections/section-040/module-01/labs/lab-01
+      title: Choose The Right Query For Each Metric Type
+      status: draft
+      runtime_verification: pending
+  - id: module-02
+    title: Label Design, Cardinality And Staleness
+    playground: true
+    module_lab: true
+    readings:
+    - sections/section-040/module-02/course-01-label-matchers-and-aggregation.md
+    - sections/section-040/module-02/course-02-cardinality-and-series-churn.md
+    - sections/section-040/module-02/course-03-staleness-up-and-target-labels.md
+    labs:
+    - id: lab-01
+      path: sections/section-040/module-02/labs/lab-01
+      title: Aggregate A High-Cardinality Label And Select With Matchers
+      status: draft
+      runtime_verification: pending
 - id: section-050
   title: Exposition Format
   curriculum_item: Exposition Format
-  capstone: false
-  section_quiz: false
+  capstone:
+    path: sections/section-050/capstone/labs/lab-01
+    title: Repair A Page With Counters, Gauges And A Histogram
+    status: draft
+    runtime_verification: pending
+  section_quiz: sections/section-050/quiz.yaml
   modules:
   - id: module-01
-    title: Reading Metric Exposition And Format Contracts
-    objectives:
-    - Interpret HELP, TYPE and labeled sample lines.
-    - Explain escaping and consistent metric-family structure.
-    - Distinguish exposition timestamps from metric values.
-    - Compare classic text and negotiated OpenMetrics behavior.
-    outline:
-    - Reading Metric Exposition And Format Contracts
-    playground: false
-    module_lab: false
-    sources:
-    - reading: sections/section-050/module-01/course-01-reading-metric-exposition-and-format-contracts.md
-      adapted_from: null
+    title: The Text Exposition Format
+    playground: true
+    module_lab: true
+    readings:
+    - sections/section-050/module-01/course-01-text-format-lines-and-families.md
+    - sections/section-050/module-01/course-02-histograms-and-summaries.md
+    - sections/section-050/module-01/course-03-content-type-and-checking-pages.md
+    labs:
+    - id: lab-01
+      path: sections/section-050/module-01/labs/lab-01
+      title: Repair An Invalid Text Exposition Page
+      status: draft
+      runtime_verification: pending
+  - id: module-02
+    title: OpenMetrics, Client Libraries And Scrape Errors
+    playground: true
+    module_lab: true
+    readings:
+    - sections/section-050/module-02/course-01-openmetrics-and-negotiation.md
+    - sections/section-050/module-02/course-02-histograms-exemplars-and-native-histograms.md
+    - sections/section-050/module-02/course-03-instrumenting-pushgateway-and-scrape-errors.md
+    labs:
+    - id: lab-01
+      path: sections/section-050/module-02/labs/lab-01
+      title: Fix An OpenMetrics Page With A Histogram
+      status: draft
+      runtime_verification: pending

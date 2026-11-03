@@ -1,31 +1,69 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Set Retention And Query Limits On The Server (LAB). Graded against the live Prometheus flags API.
 apiVersion: astrona.io/v1
 metadata:
   name: ats-048-lab-030-01-01
   docs:
-    prerequisites: docs/prerequisites.md
-    examQuestion: question.md
-    caseStudy: docs/case-study.md
-    guide: solution.md
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
 runtime:
   type: kind
   kind:
-    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
-    nodes:
-      workers: 1
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
 bootstrap:
-  init:
-  - name: seed-private-environment
-    type: file
-    source: bootstrap/setup.sh
-teardown:
-  keepCluster: false
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+
 testing:
   init:
-  - name: reference-result
-    type: file
-    source: solution/apply.sh
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
 validation:
-  script:
-    name: verify-fields-and-live-evidence
-    type: file
-    source: validate.sh
+  scripts:
+    - name: retention-time
+      description: The server keeps data for 6 hours (--storage.tsdb.retention.time=6h)
+      type: file
+      source: validation/validate-retention-time.sh
+      hint: Add the flag to the args list of the prometheus container in the Deployment.
+    - name: retention-size
+      description: The server caps block storage at 500MB (--storage.tsdb.retention.size=500MB)
+      type: file
+      source: validation/validate-retention-size.sh
+      hint: Add the flag to the same args list. The unit must be written as in the question.
+    - name: query-limits
+      description: Queries time out after 30s and may load 10000000 samples
+      type: file
+      source: validation/validate-query-limits.sh
+      hint: Use --query.timeout and --query.max-samples.
+    - name: server-healthy
+      description: Prometheus is ready and still scrapes the probe target
+      type: file
+      source: validation/validate-server-healthy.sh
+      hint: Keep the existing flags, including --config.file and --web.enable-lifecycle.
+
+teardown:
+  keepCluster: false

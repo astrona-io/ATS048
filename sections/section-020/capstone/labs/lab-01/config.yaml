@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Repair Scrape Jobs And Shape The Stored Series (LAB). Capstone for section 020. Graded against the Prometheus API.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-048-capstone-020
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
+bootstrap:
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+    - resource: deploy/exporter
+      namespace: starfleet
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: probe-up
+      description: The probe target is up
+      type: file
+      source: validation/validate-probe-up.sh
+      hint: The application serves its metrics on /metrics. Read the lastError of the target.
+    - name: exporter-up
+      description: The exporter target is up
+      type: file
+      source: validation/validate-exporter-up.sh
+      hint: The exporter listens on port 8080 on the Service exporter.
+    - name: queue-length-dropped
+      description: lab_queue_length is not stored, while the other exporter metrics are
+      type: file
+      source: validation/validate-queue-length-dropped.sh
+      hint: Use metric_relabel_configs with action drop, matching on __name__.
+    - name: env-label
+      description: Every exporter series has the label env=training
+      type: file
+      source: validation/validate-env-label.sh
+      hint: Add a label to the static_configs entry of the job, or a replace rule in relabel_configs.
+
+teardown:
+  keepCluster: false

@@ -1,31 +1,69 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Record Derived Series In A Rule File (LAB). Graded against the live Prometheus API.
 apiVersion: astrona.io/v1
 metadata:
   name: ats-048-lab-010-01-01
   docs:
-    prerequisites: docs/prerequisites.md
-    examQuestion: question.md
-    caseStudy: docs/case-study.md
-    guide: solution.md
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
 runtime:
   type: kind
   kind:
-    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
-    nodes:
-      workers: 1
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
 bootstrap:
-  init:
-  - name: seed-private-environment
-    type: file
-    source: bootstrap/setup.sh
-teardown:
-  keepCluster: false
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+
 testing:
   init:
-  - name: reference-result
-    type: file
-    source: solution/apply.sh
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
 validation:
-  script:
-    name: verify-fields-and-live-evidence
-    type: file
-    source: validate.sh
+  scripts:
+    - name: rules-loaded
+      description: Both recording rules are loaded from the rules file and evaluate without error
+      type: file
+      source: validation/validate-rules-loaded.sh
+      hint: Add a rule group to the prometheus-rules ConfigMap under the key rules.yaml, then restart Prometheus so it reads the file.
+    - name: request-rate-recorded
+      description: job:lab_requests_total:rate1m exists with only the job label and a positive value
+      type: file
+      source: validation/validate-request-rate-recorded.sh
+      hint: Use sum by (job) around rate(lab_requests_total[1m]).
+    - name: error-ratio-recorded
+      description: job:lab_requests_errors:ratio_rate1m exists and is close to the real error share
+      type: file
+      source: validation/validate-error-ratio-recorded.sh
+      hint: Divide the rate of status="500" requests by the rate of all requests, both summed by job.
+    - name: raw-series-intact
+      description: The probe target is still scraped and the raw counter is still stored
+      type: file
+      source: validation/validate-raw-series-intact.sh
+      hint: Do not change the scrape configuration. Recording rules add series; they never replace the source series.
+
+teardown:
+  keepCluster: false

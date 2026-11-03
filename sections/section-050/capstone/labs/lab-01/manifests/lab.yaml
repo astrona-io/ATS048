@@ -1,0 +1,144 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: starfleet
+data:
+  prometheus.yaml: |
+    global:
+      evaluation_interval: 2s
+      scrape_interval: 2s
+    rule_files:
+    - /rules/*.yaml
+    scrape_configs:
+    - job_name: probe
+      static_configs:
+      - labels:
+          team: starfleet
+        targets:
+        - probe:8080
+    - job_name: prometheus
+      static_configs:
+      - targets:
+        - localhost:9090
+    - job_name: exporter
+      static_configs:
+      - targets:
+        - exporter:8080
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: starfleet
+data:
+  rules.yaml: |
+    groups: []
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: exporter-code
+  namespace: starfleet
+data:
+  app.py: |
+    MODE = 'text'
+    import http.server
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+
+        def do_GET(self):
+            if self.path != '/metrics':
+                self.send_response(404)
+                self.end_headers()
+                return
+            with open('/data/metrics.txt', 'rb') as handle:
+                body = handle.read()
+            accept = self.headers.get('Accept', '')
+            if MODE == 'openmetrics' and 'application/openmetrics-text' in accept:
+                content_type = 'application/openmetrics-text; version=1.0.0; charset=utf-8'
+            else:
+                content_type = 'text/plain; version=0.0.4; charset=utf-8'
+            self.send_response(200)
+            self.send_header('Content-Type', content_type)
+            self.end_headers()
+            self.wfile.write(body)
+
+    http.server.ThreadingHTTPServer(('0.0.0.0', 8080), Handler).serve_forever()
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: exporter-metrics
+  namespace: starfleet
+data:
+  metrics.txt: |
+    # HELP lab_jobs_processed_total Jobs processed by the worker, by result.
+    # TYPE lab_jobs_processed_total counter
+    lab_jobs_processed_total{queue=default,result="ok"} 1027
+    lab_jobs_processed_total{queue="default",result="error"} 13
+    # HELP lab_workers Number of running workers.
+    # TYPE lab_workers gauge
+    lab_workers four
+    # HELP lab_task_duration_seconds Task duration in seconds.
+    # TYPE lab_task_duration_seconds histogram
+    lab_task_duration_seconds_bucket{le="0.1"} 600
+    lab_task_duration_seconds_bucket{le="0.5"} 900
+    lab_task_duration_seconds_bucket{le="1"} 1000
+    lab_task_duration_seconds_sum 412.5
+    lab_task_duration_seconds_count 1040
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exporter
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: exporter
+  template:
+    metadata:
+      labels:
+        app: exporter
+    spec:
+      containers:
+      - name: exporter
+        image: docker.io/library/python:3.13-alpine
+        command:
+        - python
+        - -u
+        - /code/app.py
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: code
+          mountPath: /code
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: code
+        configMap:
+          name: exporter-code
+      - name: data
+        configMap:
+          name: exporter-metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: exporter
+  namespace: starfleet
+spec:
+  selector:
+    app: exporter
+  ports:
+  - port: 8080
+    targetPort: 8080

@@ -1,89 +1,98 @@
----
-draft: true
-exam_objectives:
-- Data Model and Labels
----
-# Count Series By Status Label Solution
+# Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Solve this lab on `terminal`. Each step ends with `astrona submit`. The `--keep` flag keeps the lab running so you can continue after a failed check.
+
+Start the lab if it is not running:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-048-lab-040-01-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-048-lab-040-01-01" || exit 1
-node_name="astro-ats-048-lab-040-01-01-control-plane"
-worker_name="astro-ats-048-lab-040-01-01-worker"
+astrona run --git ssh://git@github.com/astrona-io/ATS048.git -c sections/section-040/module-01/labs/lab-01
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Submit once before you change anything. All four checks fail, because no rule exists.
 
-## Inspect And Explain
+## Step 1: Read the metric types from the server
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
-
-Inspect the current objects before changing them:
+Prometheus keeps the type that the application declares in the `# TYPE` line. The metadata API returns it. The type tells you which functions make sense:
 
 ```sh
-kubectl -n starfleet get pods -o wide
-kubectl get nodes -o wide
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/metadata?metric=lab_requests_total'
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/metadata?metric=lab_queue_depth'
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/metadata?metric=lab_request_duration_seconds'
 ```
 
-Count the two bounded status series. A request_id label would create a new series per event. Relate this result to cardinality and the difference between absent series and zero.
+The types are `counter`, `gauge` and `histogram`. Prometheus does not enforce that you use the right function, so the types are your guide.
 
-Use the expression `count(lab_requests_total)`. The report needs `expression`, `evaluated_at` and `data`. Data is the Prometheus API data object, not only the printed value. Wait for at least twenty seconds of collected traffic before using a rate. Record evidence within five minutes of submission. Changing the expression or claiming an empty result fails.
+## Step 2: Pick the function for each type
 
-Record observations in `starfleet/evidence`, whose `report.json` contains the stated report. The verifier reads the live API again; invented values do not pass.
+A counter only increases, and resets to zero when the process restarts. Its raw value has little meaning. The function `rate` takes the samples in a range, handles resets, and returns the average increase per second. `rate(lab_requests_total[1m])` returns one value for every label set, so there is one series for `status="200"` and one for `status="500"`. `sum by (status)` adds series with the same `status` and drops all other labels, such as `service` and `job`.
 
+A histogram is a group of counters. Each `_bucket` series counts the observations that are less than or equal to the bucket bound in its `le` label. To compute a percentile, first take the `rate` of the buckets, so that the result reflects the last minute and not the total since start. Then sum by `le`, which keeps the bucket structure but removes the other labels. Last, `histogram_quantile(0.95, ...)` estimates the 95th percentile by interpolating inside the bucket where the 95th percent falls. The result is an estimate whose accuracy depends on the bucket bounds.
 
-Save this as `record.py`:
+A gauge is a value that can go up and down, such as a queue depth. Its current sample is already meaningful, so you aggregate it directly. `rate` on a gauge is wrong, because a decrease is not a counter reset. `max(lab_queue_depth)` returns the highest value over all series.
 
-```python
-import json,subprocess,time,sys,tempfile,os
+## Step 3: Write the rules
 
-def call(*args):
- r=subprocess.run(list(args),text=True,capture_output=True,timeout=20)
- assert r.returncode==0, 'Observation command failed: '+args[0]
- return r.stdout.strip()
-def obj(kind,name,ns='starfleet'):
- return json.loads(call('kubectl',*(['-n',ns] if ns else []),'get',kind,name,'-o','json'))
-def api(path):
- script='import urllib.request; print(urllib.request.urlopen('+repr('http://prometheus:9090'+path)+',timeout=8).read().decode())'
- return json.loads(call('kubectl','-n','starfleet','exec','shuttle','--','python','-c',script))
-def save(data):
- resource={'apiVersion':'v1','kind':'ConfigMap','metadata':{'name':'evidence','namespace':'starfleet'},'data':{'report.json':json.dumps(data,sort_keys=True)}}
- with tempfile.NamedTemporaryFile(mode='w',suffix='.json',delete=False) as f:json.dump(resource,f);path=f.name
- try:call('kubectl','apply','-f',path)
- finally:os.unlink(path)
+Save this as `rules-types.yaml`:
 
-assert call('kubectl','config','current-context') == 'kind-astro-ats-048-lab-040-01-01'
-import urllib.parse
-stamp=time.time()
-expression='count(lab_requests_total)'
-answer=api('/api/v1/query?'+urllib.parse.urlencode({'query':expression,'time':stamp}))
-assert answer['status']=='success' and answer['data']['result'], 'Wait for enough scrapes'
-report={'expression':expression,'evaluated_at':stamp,'data':answer['data']}
-save(report)
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: starfleet
+data:
+  rules.yaml: |
+    groups:
+    - name: lab_types
+      interval: 5s
+      rules:
+      - record: status:lab_requests:rate1m
+        expr: sum by (status) (rate(lab_requests_total[1m]))
+      - record: lab:request_duration_seconds:p95
+        expr: histogram_quantile(0.95, sum by (le) (rate(lab_request_duration_seconds_bucket[1m])))
+      - record: lab:queue_depth:max
+        expr: max(lab_queue_depth)
 ```
 
-Apply the scoped correction:
+The names follow the convention `level:metric:operations`. The part before the first colon says which labels the series keeps, the middle part is the metric, and the last part says which operations were applied.
+
+Apply the file and restart Prometheus so that it loads it:
 
 ```sh
-python3 record.py
+kubectl apply -f rules-types.yaml
+kubectl -n starfleet rollout restart deployment/prometheus
+kubectl -n starfleet rollout status deployment/prometheus
 ```
 
-## Verify The Result
+## Step 4: Check the three series
 
-Observe the actual result. A denied request returns a nonzero status when the denial works, so run it separately from a shell sequence that stops on error. Status convergence and a successful request establish different parts of the result.
+Wait about a minute, because a one-minute `rate` needs enough samples in its window. Then query each recorded name:
 
 ```sh
-kubectl -n starfleet get configmaps
-kubectl -n starfleet get deployment probe -o yaml
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/query?query=status:lab_requests:rate1m'
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/query?query=lab:request_duration_seconds:p95'
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/query?query=lab:queue_depth:max'
 ```
 
-Evaluate the required expression and preserve its labels, values and evaluation time. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.
+The first answer has two series, one with `status` set to `200` and one set to `500`. The second has one series with no labels besides `__name__`, and a value in seconds. The third has the value 3, because the application reports a constant queue depth.
 
-After recording your result, remove the independent lab with `astrona destroy ats-048-lab-040-01-01`.
+## Step 5: Submit
 
-## Common pitfalls
+```sh
+astrona submit --git ssh://git@github.com/astrona-io/ATS048.git -c sections/section-040/module-01/labs/lab-01 --keep
+```
 
-> [!WARNING]
-> Confirm the private context and exact node names before a change. Check the stated scope and live result. Do not change unrelated components to hide the original fault.
+Four checks must pass.
+
+## What each check proved
+
+- `counter-rate-by-status` required exactly the status values `200` and `500`, positive values and no other label. A raw `lab_requests_total` copy would keep a huge cumulative value and the `service` label, and fails.
+- `histogram-quantile` required one label-free series with a value between 0 and 0.1 seconds. The largest finite bucket of the histogram is 0.1, so a valid estimate cannot be larger. A `sum` that forgot to keep `le` returns no result.
+- `gauge-max` required the value 3. `rate` on a gauge returns about 0, which fails.
+- `rules-healthy` required all three names to be loaded from a file under `/rules/` with the health `ok`.
+
+## If a check fails
+
+- If a recorded series is missing and the rule health is `ok`, wait one more evaluation interval.
+- If the percentile query has no result, check that the inner `sum by (le)` keeps the `le` label. `histogram_quantile` needs it.
+- If a rule shows health `err`, read its `lastError` in `/api/v1/rules`.

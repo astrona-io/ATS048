@@ -1,8 +1,7 @@
 training:
   id: ATS048
   title: 'PCA: Prometheus Fundamentals'
-  description: 'Detailed reading material and reusable YAML knowledge checks for PCA:
-    Prometheus Fundamentals. Technical content remains draft. Private playgrounds and draft independent labs are included.'
+  description: 'Reading material, playgrounds, graded labs, capstones and quizzes for PCA: Prometheus Fundamentals. Content is draft and labs are untested.'
   certification:
     name: Prometheus Certified Associate
     code: PCA
@@ -34,195 +33,488 @@ modules:
     path: sections/intro/course-03-how-this-course-is-made.md
 - id: module-010
   title: System Architecture
-  description: Developed reading and reasoning for System Architecture.
-  maturity: alpha
+  description: Explains how Prometheus collects, stores, queries and alerts, and how its extension components fit around the server.
   content:
   - type: reading
-    title: System Architecture
+    title: "System Architecture"
     path: sections/section-010/README.md
   - type: reading
-    title: The Prometheus Collection, Storage And Rule Pipeline
+    title: "The Prometheus Collection, Storage And Query Pipeline"
     path: sections/section-010/module-01/course.md
   - type: reading
-    title: The Prometheus Collection, Storage And Rule Pipeline
-    path: sections/section-010/module-01/course-01-the-prometheus-collection-storage-and-rule-pipeline.md
+    title: "The Scrape Pipeline: Server, Targets And Exporters"
+    path: sections/section-010/module-01/course-01-scrape-pipeline-and-targets.md
   - type: reading
-    title: Follow Scrape Evidence Through The Pipeline — Task
+    title: "Local Storage And Querying With PromQL"
+    path: sections/section-010/module-01/course-02-tsdb-storage-and-querying.md
+  - type: reading
+    title: "Recording Rules And The Rule Manager"
+    path: sections/section-010/module-01/course-03-recording-rules.md
+  - type: reading
+    title: "Record Derived Series In A Rule File - Task"
     path: sections/section-010/module-01/labs/lab-01/question.md
   - type: lab
-    title: Follow Scrape Evidence Through The Pipeline
+    title: "Record Derived Series In A Rule File"
     path: sections/section-010/module-01/labs/lab-01
     difficulty: intermediate
     estimated_duration: 25m
     topic: promql
     task_kind: build
+    tags: [prometheus, recording-rule, rule-file, promql]
     learning_goals:
-    - Evaluate the required expression and preserve its labels, values and evaluation
-      time.
-    tags:
-    - pca
-    - promql
+    - Write a rule file with two recording rules that aggregate a counter
+    - Load the file into the running server
+    - Verify the recorded series and their labels through the API
+    resources:
+    - name: "Recording rules"
+      url: https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/
   - type: reading
-    title: Follow Scrape Evidence Through The Pipeline — Solution
-    path: sections/section-010/module-01/labs/lab-01/solution.md
+    title: "Summary"
+    path: sections/section-010/module-01/course-04-summary.md
   - type: reading
-    title: 'Guided Practice: Follow Scrape Evidence Through The Pipeline'
-    path: sections/section-010/module-01/course-02-guided-practice.md
+    title: "Alerting And Extension Architecture"
+    path: sections/section-010/module-02/course.md
   - type: reading
-    title: Summary
-    path: sections/section-010/module-01/course-03-summary.md
+    title: "Alerting Rules And Alert States"
+    path: sections/section-010/module-02/course-01-alerting-rules-and-alert-states.md
+  - type: reading
+    title: "Alertmanager: Grouping, Routing, Silences And Inhibition"
+    path: sections/section-010/module-02/course-02-alertmanager-routing-and-suppression.md
+  - type: reading
+    title: "Fire An Alert And Reach Alertmanager - Task"
+    path: sections/section-010/module-02/labs/lab-01/question.md
+  - type: lab
+    title: "Fire An Alert And Reach Alertmanager"
+    path: sections/section-010/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: alerting
+    task_kind: build
+    tags: [prometheus, alerting-rule, alertmanager]
+    learning_goals:
+    - Connect Prometheus to Alertmanager with the alerting section
+    - Write an alerting rule with a for duration and a label
+    - Confirm the alert state in Prometheus and Alertmanager
+    resources:
+    - name: "Alerting rules"
+      url: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+    - name: "Alertmanager"
+      url: https://prometheus.io/docs/alerting/latest/alertmanager/
+  - type: reading
+    title: "Extending The Architecture: Pushgateway, Remote Storage, Federation And Discovery"
+    path: sections/section-010/module-02/course-03-extension-architecture.md
+  - type: reading
+    title: "Summary"
+    path: sections/section-010/module-02/course-04-summary.md
+  - type: reading
+    title: "Repair Alerting From Rule To Webhook - Task"
+    path: sections/section-010/capstone/labs/lab-01/question.md
+  - type: lab
+    title: "Repair Alerting From Rule To Webhook"
+    path: sections/section-010/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 45m
+    topic: alerting
+    task_kind: troubleshoot
+    tags: [prometheus, alerting, alertmanager, webhook]
+    learning_goals:
+    - Follow an alert through rule, Prometheus, Alertmanager and receiver
+    - Find a silent expression error and a wrong port
+    - Confirm delivery at the receiver
+    resources:
+    - name: "Alertmanager"
+      url: https://prometheus.io/docs/alerting/latest/alertmanager/
+  - type: quiz
+    title: "Knowledge Check: System Architecture"
+    path: sections/section-010/quiz.yaml
+    pass_score: 70
 - id: module-020
   title: Configuration and Scraping
-  description: Developed reading and reasoning for Configuration and Scraping.
-  maturity: alpha
+  description: Teaches the scrape configuration, service discovery and relabeling that decide which series Prometheus stores.
   content:
   - type: reading
-    title: Configuration and Scraping
+    title: "Configuration and Scraping"
     path: sections/section-020/README.md
   - type: reading
-    title: Scrape Timing, Target Labels And Failure Evidence
+    title: "The Prometheus Configuration File"
     path: sections/section-020/module-01/course.md
   - type: reading
-    title: Scrape Timing, Target Labels And Failure Evidence
-    path: sections/section-020/module-01/course-01-scrape-timing-target-labels-and-failure-evidence.md
+    title: "Global Defaults And Scrape Jobs"
+    path: sections/section-020/module-01/course-01-global-defaults-and-scrape-jobs.md
   - type: reading
-    title: Measure A Scrape Configuration — Task
+    title: "Job And Instance Labels, The up Series And Scrape Health"
+    path: sections/section-020/module-01/course-02-job-instance-labels-and-scrape-health.md
+  - type: reading
+    title: "Validating And Reloading The Configuration"
+    path: sections/section-020/module-01/course-03-validating-and-reloading-the-configuration.md
+  - type: reading
+    title: "Repair And Tune A Scrape Job - Task"
     path: sections/section-020/module-01/labs/lab-01/question.md
   - type: lab
-    title: Measure A Scrape Configuration
+    title: "Repair And Tune A Scrape Job"
     path: sections/section-020/module-01/labs/lab-01
     difficulty: intermediate
     estimated_duration: 25m
-    topic: promql
-    task_kind: build
+    topic: configuration
+    task_kind: troubleshoot
+    tags: [prometheus, scrape-config, up, scrape-interval]
     learning_goals:
-    - Evaluate the required expression and preserve its labels, values and evaluation
-      time.
-    tags:
-    - pca
-    - promql
+    - Find why a target is down from the targets API
+    - Set interval, timeout and path of a scrape job
+    - Verify the result with up and the scrape metrics
+    resources:
+    - name: "Configuration"
+      url: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
   - type: reading
-    title: Measure A Scrape Configuration — Solution
-    path: sections/section-020/module-01/labs/lab-01/solution.md
+    title: "Summary"
+    path: sections/section-020/module-01/course-04-summary.md
   - type: reading
-    title: 'Guided Practice: Measure A Scrape Configuration'
-    path: sections/section-020/module-01/course-02-guided-practice.md
+    title: "Service Discovery And Relabeling"
+    path: sections/section-020/module-02/course.md
   - type: reading
-    title: Summary
-    path: sections/section-020/module-01/course-03-summary.md
+    title: "Service Discovery And Target Labels"
+    path: sections/section-020/module-02/course-01-service-discovery-and-target-labels.md
+  - type: reading
+    title: "Relabeling Targets Before The Scrape"
+    path: sections/section-020/module-02/course-02-relabel-configs-before-the-scrape.md
+  - type: reading
+    title: "Metric Relabeling And Label Conflicts"
+    path: sections/section-020/module-02/course-03-metric-relabeling-and-honor-labels.md
+  - type: reading
+    title: "Rewrite Labels And Drop A Metric With Relabeling - Task"
+    path: sections/section-020/module-02/labs/lab-01/question.md
+  - type: lab
+    title: "Rewrite Labels And Drop A Metric With Relabeling"
+    path: sections/section-020/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: relabeling
+    task_kind: build
+    tags: [prometheus, relabel_configs, metric_relabel_configs]
+    learning_goals:
+    - Set a target label with relabel_configs
+    - Drop a metric with metric_relabel_configs
+    - Prove the effect on the stored series
+    resources:
+    - name: "Relabeling"
+      url: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+  - type: reading
+    title: "Summary"
+    path: sections/section-020/module-02/course-04-summary.md
+  - type: reading
+    title: "Repair Scrape Jobs And Shape The Stored Series - Task"
+    path: sections/section-020/capstone/labs/lab-01/question.md
+  - type: lab
+    title: "Repair Scrape Jobs And Shape The Stored Series"
+    path: sections/section-020/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 45m
+    topic: configuration
+    task_kind: troubleshoot
+    tags: [prometheus, scrape-config, relabeling]
+    learning_goals:
+    - Repair two failing scrape jobs from their errors
+    - Drop one metric with metric_relabel_configs
+    - Add a target label to every series of a job
+    resources:
+    - name: "Configuration"
+      url: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+  - type: quiz
+    title: "Knowledge Check: Configuration and Scraping"
+    path: sections/section-020/quiz.yaml
+    pass_score: 70
 - id: module-030
   title: Understanding Prometheus Limitations
-  description: Developed reading and reasoning for Understanding Prometheus Limitations.
-  maturity: alpha
+  description: Explains the storage and scale limits of a single Prometheus server and the jobs it is not meant for.
   content:
   - type: reading
-    title: Understanding Prometheus Limitations
+    title: "Understanding Prometheus Limitations"
     path: sections/section-030/README.md
   - type: reading
-    title: Prometheus Storage, Scale And Evidence Limits
+    title: "Prometheus Storage And Scale"
     path: sections/section-030/module-01/course.md
   - type: reading
-    title: Prometheus Storage, Scale And Evidence Limits
-    path: sections/section-030/module-01/course-01-prometheus-storage-scale-and-evidence-limits.md
+    title: "The Local TSDB: Head, WAL And Blocks"
+    path: sections/section-030/module-01/course-01-local-tsdb-head-wal-and-blocks.md
   - type: reading
-    title: Inspect TSDB Head Series — Task
+    title: "Retention Flags And Query Limits"
+    path: sections/section-030/module-01/course-02-retention-flags-and-query-limits.md
+  - type: reading
+    title: "Single Node, Cardinality And High Availability Pairs"
+    path: sections/section-030/module-01/course-03-single-node-cardinality-and-ha-pairs.md
+  - type: reading
+    title: "Set Retention And Query Limits On The Server - Task"
     path: sections/section-030/module-01/labs/lab-01/question.md
   - type: lab
-    title: Inspect TSDB Head Series
+    title: "Set Retention And Query Limits On The Server"
     path: sections/section-030/module-01/labs/lab-01
     difficulty: intermediate
     estimated_duration: 25m
-    topic: promql
+    topic: storage
     task_kind: build
+    tags: [prometheus, tsdb, retention, flags]
     learning_goals:
-    - Evaluate the required expression and preserve its labels, values and evaluation
-      time.
-    tags:
-    - pca
-    - promql
+    - Set time and size retention with command-line flags
+    - Bound query time and samples
+    - Keep the existing flags intact
+    resources:
+    - name: "Storage"
+      url: https://prometheus.io/docs/prometheus/latest/storage/
+    - name: "Command-line flags"
+      url: https://prometheus.io/docs/prometheus/latest/command-line/prometheus/
   - type: reading
-    title: Inspect TSDB Head Series — Solution
-    path: sections/section-030/module-01/labs/lab-01/solution.md
+    title: "Summary"
+    path: sections/section-030/module-01/course-04-summary.md
   - type: reading
-    title: 'Guided Practice: Inspect TSDB Head Series'
-    path: sections/section-030/module-01/course-02-guided-practice.md
+    title: "What Prometheus Is Not For"
+    path: sections/section-030/module-02/course.md
   - type: reading
-    title: Summary
-    path: sections/section-030/module-01/course-03-summary.md
+    title: "Metrics Versus Logs, Traces, Events And Exact Accounting"
+    path: sections/section-030/module-02/course-01-metrics-versus-logs-traces-and-exact-accounting.md
+  - type: reading
+    title: "Pull Model, Staleness, Long-Term Storage And Alert Delivery"
+    path: sections/section-030/module-02/course-02-pull-model-staleness-long-term-storage-and-alert-delivery.md
+  - type: reading
+    title: "Protecting The Server With Sample And Label Limits"
+    path: sections/section-030/module-02/course-03-protecting-the-server-with-sample-and-label-limits.md
+  - type: reading
+    title: "Protect The Server From A High-Cardinality Target - Task"
+    path: sections/section-030/module-02/labs/lab-01/question.md
+  - type: lab
+    title: "Protect The Server From A High-Cardinality Target"
+    path: sections/section-030/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: cardinality
+    task_kind: build
+    tags: [prometheus, cardinality, sample_limit]
+    learning_goals:
+    - Add a scrape job with a sample limit
+    - Explain why the whole scrape is rejected
+    - Show that no part of the rejected scrape is stored
+    resources:
+    - name: "Scrape configuration"
+      url: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config
+  - type: reading
+    title: "Summary"
+    path: sections/section-030/module-02/course-04-summary.md
+  - type: reading
+    title: "Bound The Server Storage And A Crowded Target - Task"
+    path: sections/section-030/capstone/labs/lab-01/question.md
+  - type: lab
+    title: "Bound The Server Storage And A Crowded Target"
+    path: sections/section-030/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 45m
+    topic: storage
+    task_kind: build
+    tags: [prometheus, retention, sample_limit, cardinality]
+    learning_goals:
+    - Set retention flags without removing existing flags
+    - Limit a crowded job with sample_limit
+    - Show that the rejected scrape stores nothing
+    resources:
+    - name: "Storage"
+      url: https://prometheus.io/docs/prometheus/latest/storage/
+  - type: quiz
+    title: "Knowledge Check: Understanding Prometheus Limitations"
+    path: sections/section-030/quiz.yaml
+    pass_score: 70
 - id: module-040
   title: Data Model and Labels
-  description: Developed reading and reasoning for Data Model and Labels.
-  maturity: alpha
+  description: Explains time series, labels and metric types, and how label design affects queries and cost.
   content:
   - type: reading
-    title: Data Model and Labels
+    title: "Data Model and Labels"
     path: sections/section-040/README.md
   - type: reading
-    title: Series Identity, Label Cardinality And Staleness
+    title: "Time Series, Samples And Metric Types"
     path: sections/section-040/module-01/course.md
   - type: reading
-    title: Series Identity, Label Cardinality And Staleness
-    path: sections/section-040/module-01/course-01-series-identity-label-cardinality-and-staleness.md
+    title: "Series, Samples, Names And Labels"
+    path: sections/section-040/module-01/course-01-series-samples-names-and-labels.md
   - type: reading
-    title: Count Series By Status Label — Task
+    title: "Counters And Gauges"
+    path: sections/section-040/module-01/course-02-counters-and-gauges.md
+  - type: reading
+    title: "Histograms And Summaries"
+    path: sections/section-040/module-01/course-03-histograms-and-summaries.md
+  - type: reading
+    title: "Choose The Right Query For Each Metric Type - Task"
     path: sections/section-040/module-01/labs/lab-01/question.md
   - type: lab
-    title: Count Series By Status Label
+    title: "Choose The Right Query For Each Metric Type"
     path: sections/section-040/module-01/labs/lab-01
     difficulty: intermediate
     estimated_duration: 25m
     topic: promql
     task_kind: build
+    tags: [prometheus, metric-types, rate, histogram_quantile]
     learning_goals:
-    - Evaluate the required expression and preserve its labels, values and evaluation
-      time.
-    tags:
-    - pca
-    - promql
+    - Use rate for a counter, histogram_quantile for a histogram and the raw value for a gauge
+    - Aggregate away labels that are not needed
+    - Record the three results as rules
+    resources:
+    - name: "Metric types"
+      url: https://prometheus.io/docs/concepts/metric_types/
+    - name: "Query functions"
+      url: https://prometheus.io/docs/prometheus/latest/querying/functions/
   - type: reading
-    title: Count Series By Status Label — Solution
-    path: sections/section-040/module-01/labs/lab-01/solution.md
+    title: "Summary"
+    path: sections/section-040/module-01/course-04-summary.md
   - type: reading
-    title: 'Guided Practice: Count Series By Status Label'
-    path: sections/section-040/module-01/course-02-guided-practice.md
+    title: "Label Design, Cardinality And Staleness"
+    path: sections/section-040/module-02/course.md
   - type: reading
-    title: Summary
-    path: sections/section-040/module-01/course-03-summary.md
+    title: "Label Matchers And Aggregation"
+    path: sections/section-040/module-02/course-01-label-matchers-and-aggregation.md
+  - type: reading
+    title: "Cardinality And Series Churn"
+    path: sections/section-040/module-02/course-02-cardinality-and-series-churn.md
+  - type: reading
+    title: "Staleness, Up, Instance And Job"
+    path: sections/section-040/module-02/course-03-staleness-up-and-target-labels.md
+  - type: reading
+    title: "Aggregate A High-Cardinality Label And Select With Matchers - Task"
+    path: sections/section-040/module-02/labs/lab-01/question.md
+  - type: lab
+    title: "Aggregate A High-Cardinality Label And Select With Matchers"
+    path: sections/section-040/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: promql
+    task_kind: build
+    tags: [prometheus, labels, cardinality, matchers]
+    learning_goals:
+    - Aggregate away a label with many values
+    - Select series with equality and regular expression matchers
+    - Record the aggregation as a rule
+    resources:
+    - name: "Data model"
+      url: https://prometheus.io/docs/concepts/data_model/
+    - name: "Querying basics"
+      url: https://prometheus.io/docs/prometheus/latest/querying/basics/
+  - type: reading
+    title: "Summary"
+    path: sections/section-040/module-02/course-04-summary.md
+  - type: reading
+    title: "Record Rate, Aggregation And Percentile Series - Task"
+    path: sections/section-040/capstone/labs/lab-01/question.md
+  - type: lab
+    title: "Record Rate, Aggregation And Percentile Series"
+    path: sections/section-040/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 45m
+    topic: promql
+    task_kind: build
+    tags: [prometheus, recording-rule, labels, histogram_quantile]
+    learning_goals:
+    - Choose the function by metric type
+    - Aggregate away a high-cardinality label
+    - Use a regular expression matcher
+    resources:
+    - name: "Recording rules"
+      url: https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/
+  - type: quiz
+    title: "Knowledge Check: Data Model and Labels"
+    path: sections/section-040/quiz.yaml
+    pass_score: 70
 - id: module-050
   title: Exposition Format
-  description: Developed reading and reasoning for Exposition Format.
-  maturity: alpha
+  description: Teaches the text exposition format and OpenMetrics that applications use to publish metrics.
   content:
   - type: reading
-    title: Exposition Format
+    title: "Exposition Format"
     path: sections/section-050/README.md
   - type: reading
-    title: Reading Metric Exposition And Format Contracts
+    title: "The Text Exposition Format"
     path: sections/section-050/module-01/course.md
   - type: reading
-    title: Reading Metric Exposition And Format Contracts
-    path: sections/section-050/module-01/course-01-reading-metric-exposition-and-format-contracts.md
+    title: "Lines, Families And Labels In The Text Format"
+    path: sections/section-050/module-01/course-01-text-format-lines-and-families.md
   - type: reading
-    title: Read Typed Prometheus Exposition — Task
+    title: "Histograms And Summaries On The Page"
+    path: sections/section-050/module-01/course-02-histograms-and-summaries.md
+  - type: reading
+    title: "Content Type, promtool And Parse Errors"
+    path: sections/section-050/module-01/course-03-content-type-and-checking-pages.md
+  - type: reading
+    title: "Repair An Invalid Text Exposition Page - Task"
     path: sections/section-050/module-01/labs/lab-01/question.md
   - type: lab
-    title: Read Typed Prometheus Exposition
+    title: "Repair An Invalid Text Exposition Page"
     path: sections/section-050/module-01/labs/lab-01
     difficulty: intermediate
     estimated_duration: 25m
-    topic: diagnostic-evidence
-    task_kind: build
+    topic: exposition
+    task_kind: troubleshoot
+    tags: [prometheus, exposition-format, text-format]
     learning_goals:
-    - Record the actual HELP, TYPE and sample lines from the producer.
-    tags:
-    - pca
-    - diagnostic-evidence
+    - Read the parse error of a failed scrape
+    - Correct label quoting, sample values and metric names
+    - Verify the series and their types
+    resources:
+    - name: "Exposition formats"
+      url: https://prometheus.io/docs/instrumenting/exposition_formats/
   - type: reading
-    title: Read Typed Prometheus Exposition — Solution
-    path: sections/section-050/module-01/labs/lab-01/solution.md
+    title: "Summary"
+    path: sections/section-050/module-01/course-04-summary.md
   - type: reading
-    title: 'Guided Practice: Read Typed Prometheus Exposition'
-    path: sections/section-050/module-01/course-02-guided-practice.md
+    title: "OpenMetrics, Client Libraries And Scrape Errors"
+    path: sections/section-050/module-02/course.md
   - type: reading
-    title: Summary
-    path: sections/section-050/module-01/course-03-summary.md
+    title: "OpenMetrics And Format Negotiation"
+    path: sections/section-050/module-02/course-01-openmetrics-and-negotiation.md
+  - type: reading
+    title: "Histograms, Exemplars And Native Histograms"
+    path: sections/section-050/module-02/course-02-histograms-exemplars-and-native-histograms.md
+  - type: reading
+    title: "Client Libraries, The Pushgateway And Scrape Errors"
+    path: sections/section-050/module-02/course-03-instrumenting-pushgateway-and-scrape-errors.md
+  - type: reading
+    title: "Fix An OpenMetrics Page With A Histogram - Task"
+    path: sections/section-050/module-02/labs/lab-01/question.md
+  - type: lab
+    title: "Fix An OpenMetrics Page With A Histogram"
+    path: sections/section-050/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: exposition
+    task_kind: troubleshoot
+    tags: [prometheus, openmetrics, histogram, eof]
+    learning_goals:
+    - Add the required terminator line to an OpenMetrics page
+    - Complete a histogram with the +Inf bucket
+    - Verify with histogram_quantile
+    resources:
+    - name: "Exposition formats"
+      url: https://prometheus.io/docs/instrumenting/exposition_formats/
+  - type: reading
+    title: "Summary"
+    path: sections/section-050/module-02/course-04-summary.md
+  - type: reading
+    title: "Repair A Page With Counters, Gauges And A Histogram - Task"
+    path: sections/section-050/capstone/labs/lab-01/question.md
+  - type: lab
+    title: "Repair A Page With Counters, Gauges And A Histogram"
+    path: sections/section-050/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 45m
+    topic: exposition
+    task_kind: troubleshoot
+    tags: [prometheus, exposition-format, histogram, metadata]
+    learning_goals:
+    - Find all faults of a failing text page
+    - Complete a histogram
+    - Check the types through the metadata API
+    resources:
+    - name: "Exposition formats"
+      url: https://prometheus.io/docs/instrumenting/exposition_formats/
+  - type: quiz
+    title: "Knowledge Check: Exposition Format"
+    path: sections/section-050/quiz.yaml
+    pass_score: 70
+  - type: quiz
+    title: "Final Knowledge Check: Prometheus Fundamentals"
+    path: sections/final-domain-quiz.yaml
+    pass_score: 70

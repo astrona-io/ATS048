@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Record Rate, Aggregation And Percentile Series (LAB). Capstone for section 040. Graded against the Prometheus API.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-048-capstone-040
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
+bootstrap:
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+    - resource: deploy/crowded
+      namespace: starfleet
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: rules-healthy
+      description: All four recording rules are loaded from the rules file and healthy
+      type: file
+      source: validation/validate-rules-healthy.sh
+      hint: Put the four records in one group of rules.yaml and restart Prometheus.
+    - name: request-rates
+      description: job:lab_requests:rate1m has only the job label, and lab:requests_failed:rate1m has no labels and is positive
+      type: file
+      source: validation/validate-request-rates.sh
+      hint: Aggregate with sum by (job) for the first rule and select status with a regular expression matcher for the second.
+    - name: path-sum
+      description: path:lab_http_requests:sum has one series for each of the three paths, with only the path label
+      type: file
+      source: validation/validate-path-sum.sh
+      hint: The label request_id must disappear. Use sum by (path).
+    - name: latency-p90
+      description: lab:request_duration_seconds:p90 is a latency in seconds from the histogram buckets
+      type: file
+      source: validation/validate-latency-p90.sh
+      hint: Use histogram_quantile over the rate of the _bucket series, summed by le.
+
+teardown:
+  keepCluster: false

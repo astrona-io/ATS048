@@ -1,31 +1,71 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Repair An Invalid Text Exposition Page (LAB). Graded against the live Prometheus API.
 apiVersion: astrona.io/v1
 metadata:
   name: ats-048-lab-050-01-01
   docs:
-    prerequisites: docs/prerequisites.md
-    examQuestion: question.md
-    caseStudy: docs/case-study.md
-    guide: solution.md
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
 runtime:
   type: kind
   kind:
-    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
-    nodes:
-      workers: 1
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
 bootstrap:
-  init:
-  - name: seed-private-environment
-    type: file
-    source: bootstrap/setup.sh
-teardown:
-  keepCluster: false
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+    - resource: deploy/exporter
+      namespace: starfleet
+
 testing:
   init:
-  - name: reference-result
-    type: file
-    source: solution/apply.sh
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
 validation:
-  script:
-    name: verify-fields-and-live-evidence
-    type: file
-    source: validate.sh
+  scripts:
+    - name: exporter-scrape-ok
+      description: The exporter target is up, so Prometheus parsed the whole page
+      type: file
+      source: validation/validate-exporter-scrape-ok.sh
+      hint: A single invalid line fails the whole scrape. Read lastError in the targets API for the line number.
+    - name: counter-series
+      description: lab_jobs_processed_total has the series ok=1027 and error=13 with the label queue=default
+      type: file
+      source: validation/validate-counter-series.sh
+      hint: Label values must be inside double quotes.
+    - name: gauge-values
+      description: lab_workers is 4 and lab_queue_length is 7
+      type: file
+      source: validation/validate-gauge-values.sh
+      hint: Sample values are numbers, and metric names allow letters, digits, underscores and colons only.
+    - name: types-declared
+      description: The metadata API reports counter for lab_jobs_processed_total and gauge for the other two
+      type: file
+      source: validation/validate-types-declared.sh
+      hint: Keep the HELP and TYPE lines directly above their samples.
+
+teardown:
+  keepCluster: false

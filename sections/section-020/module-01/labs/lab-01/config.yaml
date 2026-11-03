@@ -1,31 +1,69 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Repair And Tune A Scrape Job (LAB). Graded against the live Prometheus API.
 apiVersion: astrona.io/v1
 metadata:
   name: ats-048-lab-020-01-01
   docs:
-    prerequisites: docs/prerequisites.md
-    examQuestion: question.md
-    caseStudy: docs/case-study.md
-    guide: solution.md
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
 runtime:
   type: kind
   kind:
-    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
-    nodes:
-      workers: 1
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
 bootstrap:
-  init:
-  - name: seed-private-environment
-    type: file
-    source: bootstrap/setup.sh
-teardown:
-  keepCluster: false
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+
 testing:
   init:
-  - name: reference-result
-    type: file
-    source: solution/apply.sh
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
 validation:
-  script:
-    name: verify-fields-and-live-evidence
-    type: file
-    source: validate.sh
+  scripts:
+    - name: probe-target-up
+      description: The probe job scrapes the application and up is 1
+      type: file
+      source: validation/validate-probe-target-up.sh
+      hint: The probe Service listens on port 8080. up is 0 when the scrape request fails.
+    - name: probe-scrape-timing
+      description: The probe job has scrape_interval 5s and scrape_timeout 3s
+      type: file
+      source: validation/validate-probe-scrape-timing.sh
+      hint: Set both fields inside the probe job, not in the global section.
+    - name: probe-env-label
+      description: Every probe series carries env="lab" from the target group
+      type: file
+      source: validation/validate-probe-env-label.sh
+      hint: Add a labels map next to targets in static_configs.
+    - name: self-scrape-kept
+      description: The prometheus job still scrapes the Prometheus server and keeps the global interval
+      type: file
+      source: validation/validate-self-scrape-kept.sh
+      hint: Change only the probe job.
+
+teardown:
+  keepCluster: false

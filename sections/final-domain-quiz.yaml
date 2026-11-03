@@ -1,0 +1,776 @@
+# Final domain knowledge check across all five sections.
+schema_version: 1
+kind: question_bank
+id: ats048-final
+course_id: ATS048
+exam_code: PCA
+status: draft
+provenance: Original practice material written for this course; not official exam
+  questions.
+scope:
+  type: domain
+  id: prometheus-fundamentals
+  title: Prometheus Fundamentals
+questions:
+- id: ats048-final-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain what the up series shows and what it does not show
+  source_readings:
+  - sections/section-010/module-01/course-01-scrape-pipeline-and-targets.md
+  prompt: The `probe` target shows `up` equal to 1, but users report that every real
+    request fails. What does `up` tell you?
+  options:
+  - id: a
+    text: The application is healthy, so the reports are wrong.
+    explanation: "`up` does not measure application health."
+  - id: b
+    text: The last scrape of the target succeeded, and nothing more.
+    explanation: Correct. `up` records only whether the scrape worked. The application
+      can fail on real requests while `/metrics` still answers.
+  - id: c
+    text: All requests in the last minute succeeded.
+    explanation: This option confuses scrape success with request success.
+  - id: d
+    text: The Prometheus server stored the samples on disk.
+    explanation: Storage is not what `up` measures.
+  correct_option: b
+  explanation: "`up` is 1 when the scrape request succeeds. It is not a health check
+    of the application logic."
+- id: ats048-final-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Describe how samples move from the head block to persisted blocks
+  source_readings:
+  - sections/section-010/module-01/course-02-tsdb-storage-and-querying.md
+  prompt: A Prometheus server restarts. Which structure lets it rebuild the recent
+    in-memory data?
+  options:
+  - id: a
+    text: The persisted blocks only.
+    explanation: Persisted blocks hold older data, not the latest samples of the head.
+  - id: b
+    text: The write-ahead log.
+    explanation: Correct. Every sample is also appended to the WAL, and the server
+      replays it at start to rebuild the head block.
+  - id: c
+    text: Alertmanager state.
+    explanation: Alertmanager holds alerts and has no samples.
+  - id: d
+    text: The scrape targets, which resend their history.
+    explanation: Targets only report current values.
+  correct_option: b
+  explanation: The WAL protects the head block against loss on restart.
+- id: ats048-final-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain the role of a recording rule
+  source_readings:
+  - sections/section-010/module-01/course-03-recording-rules.md
+  prompt: What does a recording rule do?
+  options:
+  - id: a
+    text: It evaluates an expression on a schedule and stores the result as a new
+      series.
+    explanation: Correct. The result is queryable under the name in `record`.
+  - id: b
+    text: It sends the result to Alertmanager.
+    explanation: That is the job of alerting rules.
+  - id: c
+    text: It fills past gaps in the raw series.
+    explanation: A recording rule has no history before its first evaluation.
+  - id: d
+    text: It changes labels of the scraped target.
+    explanation: That is relabeling.
+  correct_option: a
+  explanation: Recording rules precompute expressions and store the result.
+- id: ats048-final-q04
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Diagnose an alert that never fires
+  source_readings:
+  - sections/section-010/module-02/course-01-alerting-rules-and-alert-states.md
+  prompt: An alerting rule has `health` of `ok`, but its alert is always inactive.
+    Which cause fits best?
+  options:
+  - id: a
+    text: The expression selects a metric name that does not exist, so it returns
+      an empty result.
+    explanation: Correct. A valid expression with no matching series is healthy and
+      never produces an alert.
+  - id: b
+    text: Alertmanager has a wrong port.
+    explanation: That affects delivery, not the state in Prometheus.
+  - id: c
+    text: A silence matches the alert.
+    explanation: A silence does not change the state in Prometheus.
+  - id: d
+    text: The group uses `group_by`.
+    explanation: "`group_by` is an Alertmanager routing setting."
+  correct_option: a
+  explanation: Check the expression with a query first.
+- id: ats048-final-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish silences from inhibition
+  source_readings:
+  - sections/section-010/module-02/course-02-alertmanager-routing-and-suppression.md
+  prompt: Planned maintenance on one service will fire alerts for two hours. Which
+    tool mutes them for a fixed time without a configuration change?
+  options:
+  - id: a
+    text: An inhibit rule.
+    explanation: Inhibition depends on a source alert and is set in the configuration
+      file.
+  - id: b
+    text: A silence with matchers.
+    explanation: Correct. A silence is created at run time and ends at its end time.
+  - id: c
+    text: A longer `for` in the rule.
+    explanation: This delays firing but does not mute it.
+  - id: d
+    text: A recording rule.
+    explanation: Recording rules do not mute alerts.
+  correct_option: b
+  explanation: A silence mutes matching alerts for a period of time.
+- id: ats048-final-q06
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Name the risk of the Pushgateway
+  source_readings:
+  - sections/section-010/module-02/course-03-extension-architecture.md
+  prompt: Which statement about the Pushgateway is correct?
+  options:
+  - id: a
+    text: It deletes the metrics of a job when the job exits.
+    explanation: It keeps the values until they are deleted.
+  - id: b
+    text: It keeps pushed values until deleted, so a stopped job can still look current.
+    explanation: Correct. This is why it is not used for long-running services.
+  - id: c
+    text: It evaluates alerting rules.
+    explanation: Only Prometheus evaluates rules.
+  - id: d
+    text: It replaces scraping for all targets.
+    explanation: It is meant only for batch jobs.
+  correct_option: b
+  explanation: Stale values stay in a Pushgateway.
+- id: ats048-final-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain which rule links scrape interval and scrape timeout
+  source_readings:
+  - sections/section-020/module-01/course-01-global-defaults-and-scrape-jobs.md
+  prompt: 'A job sets `scrape_interval: 5s` and nothing else, while `global` has `scrape_timeout:
+    10s`. What happens when Prometheus loads the file?'
+  options:
+  - id: a
+    text: Prometheus loads it and uses a timeout of 5 seconds.
+    explanation: Prometheus does not shorten the timeout by itself.
+  - id: b
+    text: Prometheus rejects the file, because the inherited timeout is larger than
+      the interval.
+    explanation: Correct. The timeout cannot be greater than the interval, and the
+      check runs after inheritance.
+  - id: c
+    text: Prometheus loads it and scrapes every 10 seconds.
+    explanation: The job value for the interval is used as written.
+  - id: d
+    text: Prometheus loads it and ignores the job interval.
+    explanation: A job value overrides the global value.
+  correct_option: b
+  explanation: A scrape timeout greater than the scrape interval is invalid, also
+    when the timeout is inherited from the global section.
+- id: ats048-final-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Tell evaluation_interval from scrape_interval
+  source_readings:
+  - sections/section-020/module-01/course-01-global-defaults-and-scrape-jobs.md
+  prompt: 'The `global` section sets `evaluation_interval: 30s` and `scrape_interval:
+    5s`. What does the evaluation interval control?'
+  options:
+  - id: a
+    text: How long a scrape may take.
+    explanation: That is the scrape timeout.
+  - id: b
+    text: How long samples are kept.
+    explanation: Retention is a separate server flag.
+  - id: c
+    text: How often targets are scraped.
+    explanation: That is the scrape interval.
+  - id: d
+    text: How often the rule manager evaluates recording and alerting rules.
+    explanation: Correct. The two clocks are independent.
+  correct_option: d
+  explanation: The evaluation interval applies to rule groups only.
+- id: ats048-final-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Interpret the up series
+  source_readings:
+  - sections/section-020/module-01/course-02-job-instance-labels-and-scrape-health.md
+  prompt: The series `up{job="probe"}` has the value 0. What does this prove?
+  options:
+  - id: a
+    text: The configuration was not loaded.
+    explanation: A loaded configuration is shown by the reload metric.
+  - id: b
+    text: The application process has crashed.
+    explanation: The scrape can fail for other reasons, such as a wrong path or a
+      timeout.
+  - id: c
+    text: The last scrape of the target failed.
+    explanation: Correct. The reason is in `lastError` in the targets API.
+  - id: d
+    text: The target returned too many samples.
+    explanation: That would show in `scrape_samples_scraped`.
+  correct_option: c
+  explanation: The value of up describes the scrape, not the health of the application.
+- id: ats048-final-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain what happens on a failed reload
+  source_readings:
+  - sections/section-020/module-01/course-03-validating-and-reloading-the-configuration.md
+  prompt: A reload request contains a file with an invalid value. What happens?
+  options:
+  - id: a
+    text: The server stops.
+    explanation: The server keeps running.
+  - id: b
+    text: The server applies the valid part of the file.
+    explanation: The file is rejected as a whole.
+  - id: c
+    text: The server keeps the old configuration, and `prometheus_config_last_reload_successful`
+      becomes 0.
+    explanation: Correct. The error goes to the log and the previous configuration
+      stays in force.
+  - id: d
+    text: The server loads an empty configuration.
+    explanation: It never falls back to an empty configuration.
+  correct_option: c
+  explanation: An invalid file is rejected and the old configuration stays in force.
+- id: ats048-final-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Read the labels before and after relabeling
+  source_readings:
+  - sections/section-020/module-02/course-01-service-discovery-and-target-labels.md
+  prompt: What happens to the label `__meta_kubernetes_pod_name` of a target if no
+    rule copies it?
+  options:
+  - id: a
+    text: It is removed after relabeling and never reaches storage.
+    explanation: Correct. A rule must copy it into a normal label.
+  - id: b
+    text: It becomes the `instance` label.
+    explanation: The instance label comes from `__address__`.
+  - id: c
+    text: It becomes the `job` label.
+    explanation: The job label is the job name.
+  - id: d
+    text: It is stored on every series.
+    explanation: Labels that start with two underscores are removed after relabeling.
+  correct_option: a
+  explanation: Internal and meta labels exist only during relabeling.
+- id: ats048-final-q12
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Predict the effect of writing instance in relabel_configs
+  source_readings:
+  - sections/section-020/module-02/course-02-relabel-configs-before-the-scrape.md
+  prompt: 'A rule in `relabel_configs` has `target_label: instance` and `replacement:
+    probe-main`, with no source labels. What happens to the scrape URL?'
+  options:
+  - id: a
+    text: The scrape fails.
+    explanation: The target is still scraped from its address.
+  - id: b
+    text: The target is dropped.
+    explanation: Only `drop` and `keep` remove targets.
+  - id: c
+    text: It becomes `http://probe-main/metrics`.
+    explanation: The address was not changed.
+  - id: d
+    text: It does not change. Only the label `instance` has a new value.
+    explanation: Correct. The URL comes from `__address__`.
+  correct_option: d
+  explanation: Prometheus connects to __address__, and instance is only a label.
+- id: ats048-final-q13
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain where a new sample is stored first and what protects
+    it from a crash
+  source_readings:
+  - sections/section-030/module-01/course-01-local-tsdb-head-wal-and-blocks.md
+  prompt: A Prometheus server has just scraped a target. Where does the TSDB store
+    the new sample first, and what lets the server recover it after a crash?
+  options:
+  - id: a
+    text: The head block in memory, with the write-ahead log on disk replayed at start.
+    explanation: Correct. The head block holds the newest data in memory, and the
+      WAL records every append so the server can rebuild the head block after a restart.
+  - id: b
+    text: An immutable block on disk, which the server reads again after a crash.
+    explanation: Blocks are written later, when the head block is compacted. A new
+      sample is not in a block yet.
+  - id: c
+    text: A remote storage system that receives a copy of every sample.
+    explanation: Remote write is optional and is not part of how the TSDB protects
+      the head block.
+  - id: d
+    text: The Alertmanager, which keeps the last value of every series.
+    explanation: Alertmanager receives alerts. It does not store samples.
+  correct_option: a
+  explanation: Correct. The head block holds the newest data in memory, and the WAL
+    records every append so the server can rebuild the head block after a restart.
+- id: ats048-final-q14
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain why data can stay longer than the retention time
+  source_readings:
+  - sections/section-030/module-01/course-02-retention-flags-and-query-limits.md
+  prompt: Retention time is set to `6h`. A block on disk covers 10:00 to 12:00. At
+    18:10, the block is still on disk. What explains this?
+  options:
+  - id: a
+    text: The retention flag works on single samples, so some samples stay by design.
+    explanation: Retention works on whole blocks, not on single samples.
+  - id: b
+    text: The flag was ignored because flags are only a hint.
+    explanation: Flags are applied exactly. The block has simply not been removed
+      yet.
+  - id: c
+    text: A block is removed only when the whole block is outside the window, and
+      the cleanup runs in the background and can be late.
+    explanation: Correct. The block is fully outside the 6 hour window only after
+      18:00, and the background cleanup can take up to two hours to remove it.
+  - id: d
+    text: The WAL keeps every block for at least a day.
+    explanation: The WAL covers only recent head block data and does not keep finished
+      blocks.
+  correct_option: c
+  explanation: Correct. The block is fully outside the 6 hour window only after 18:00,
+    and the background cleanup can take up to two hours to remove it.
+- id: ats048-final-q15
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain what a high availability pair of Prometheus servers
+    provides
+  source_readings:
+  - sections/section-030/module-01/course-03-single-node-cardinality-and-ha-pairs.md
+  prompt: Two identical Prometheus servers scrape the same targets. What does this
+    setup give you?
+  options:
+  - id: a
+    text: Protection against the failure of one server, with duplicate alerts that
+      Alertmanager merges.
+    explanation: Correct. Each server holds its own data and sends alerts. The pair
+      adds no capacity and no shared database.
+  - id: b
+    text: Twice the capacity, because the servers share the series between them.
+    explanation: Each server stores all data, so the capacity of the pair equals the
+      capacity of one server.
+  - id: c
+    text: One shared database that both servers read and write.
+    explanation: The two TSDBs are separate and the servers do not exchange samples.
+  - id: d
+    text: Durable history even if both servers lose their disks.
+    explanation: Both servers store locally. Durable history needs storage outside
+      Prometheus.
+  correct_option: a
+  explanation: Correct. Each server holds its own data and sends alerts. The pair
+    adds no capacity and no shared database.
+- id: ats048-final-q16
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Decide which question needs logs or traces and not metrics
+  source_readings:
+  - sections/section-030/module-02/course-01-metrics-versus-logs-traces-and-exact-accounting.md
+  prompt: Which question is the least suited to Prometheus?
+  options:
+  - id: a
+    text: What is the error rate of the `probe` over the last five minutes?
+    explanation: This is the kind of question metrics answer well.
+  - id: b
+    text: Why did the request with identifier `a1b2` return status 500?
+    explanation: Correct. A metric summarises many events and cannot show one request.
+      A log line or a trace answers this question.
+  - id: c
+    text: Is the memory use of a node above 90 percent?
+    explanation: A gauge answers this well.
+  - id: d
+    text: How did the request rate change since yesterday?
+    explanation: A counter with `rate()` answers this well.
+  correct_option: b
+  explanation: Correct. A metric summarises many events and cannot show one request.
+    A log line or a trace answers this question.
+- id: ats048-final-q17
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain how gaps, up and staleness relate
+  source_readings:
+  - sections/section-030/module-02/course-02-pull-model-staleness-long-term-storage-and-alert-delivery.md
+  prompt: A graph of a metric shows a gap for ten minutes. Which series tells you
+    whether the target could not be scraped?
+  options:
+  - id: a
+    text: "`up`, which is 0 when the scrape failed."
+    explanation: Correct. The server writes `up` for every scrape, so a value of 0
+      separates a failed scrape from a target with no data.
+  - id: b
+    text: "`prometheus_tsdb_head_series`, which drops to 0 during a gap."
+    explanation: This metric counts series in the head block. It does not report scrape
+      results.
+  - id: c
+    text: "`scrape_interval`, which is stored as a series for each target."
+    explanation: The scrape interval is a configuration value and not a series.
+  - id: d
+    text: "`ALERTS`, which always shows the cause of a gap."
+    explanation: "`ALERTS` shows pending and firing alerts and does not explain a
+      gap."
+  correct_option: a
+  explanation: Correct. The server writes `up` for every scrape, so a value of 0 separates
+    a failed scrape from a target with no data.
+- id: ats048-final-q18
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Explain the delivery path and failure points of alerts
+  source_readings:
+  - sections/section-030/module-02/course-02-pull-model-staleness-long-term-storage-and-alert-delivery.md
+  prompt: The Prometheus server crashes at night while a real fault happens. No alert
+    arrives. Which design best detects this kind of silent failure?
+  options:
+  - id: a
+    text: Add an alert on the same server that fires when the server is down.
+    explanation: A server that is down does not evaluate any rule, so it cannot send
+      this alert.
+  - id: b
+    text: Raise `--query.timeout` so that rules always finish.
+    explanation: The timeout does not affect whether the server runs.
+  - id: c
+    text: Set a `sample_limit` on the Alertmanager job.
+    explanation: The limit controls samples of a scrape, not alert delivery.
+  - id: d
+    text: Run an HA pair and add an always-firing watchdog alert that an external
+      service watches.
+    explanation: Correct. If the watchdog alert stops arriving, the external service
+      raises its own alarm. The pair reduces the chance that both servers fail.
+  correct_option: d
+  explanation: Correct. If the watchdog alert stops arriving, the external service
+    raises its own alarm. The pair reduces the chance that both servers fail.
+- id: ats048-final-q19
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Describe what identifies a time series in Prometheus
+  source_readings:
+  - sections/section-040/module-01/course-01-series-samples-names-and-labels.md
+  prompt: Two series have the metric name `lab_requests_total` and the same `job`
+    and `instance`. One has `status="200"` and the other has `status="500"`. How does
+    Prometheus treat them?
+  options:
+  - id: a
+    text: As one series with two values, because the metric name is the same.
+    explanation: The name alone does not identify a series. The full label set does.
+  - id: b
+    text: As two separate series, because one label value differs.
+    explanation: Correct. A series is identified by the metric name and the full set
+      of labels, so one different value makes a new series.
+  - id: c
+    text: As one series, because `status` is only a description of the sample.
+    explanation: Labels are part of the identity, not a description.
+  - id: d
+    text: As an error, because a metric name can only exist once.
+    explanation: A metric name exists once for each label set, and many label sets
+      are normal.
+  correct_option: b
+  explanation: A series is identified by the metric name and the full set of labels,
+    so one different label value makes a new series.
+- id: ats048-final-q20
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Apply the metric naming conventions for units and counters
+  source_readings:
+  - sections/section-040/module-01/course-01-series-samples-names-and-labels.md
+  prompt: An application measures how long requests take and counts them. Which pair
+    of metric names follows the Prometheus conventions?
+  options:
+  - id: a
+    text: "`request_duration_milliseconds` and `requests_count`"
+    explanation: Base units are seconds, and a counter ends in `_total`.
+  - id: b
+    text: "`RequestDurationSeconds` and `requests_by_status_total`"
+    explanation: Names use lowercase with underscores, and the name must not contain
+      a label name such as `status`.
+  - id: c
+    text: "`request_duration_seconds` and `requests_total`"
+    explanation: Correct. Use base units as a plural suffix and end counters with
+      `_total`.
+  - id: d
+    text: "`request:duration:seconds` and `requests:total`"
+    explanation: The colon is reserved for recording rule names.
+  correct_option: c
+  explanation: Metrics use base units as a suffix, such as `_seconds`, and counters
+    end in `_total`. The colon belongs to recording rules.
+- id: ats048-final-q21
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain why rate is wrong for a gauge
+  source_readings:
+  - sections/section-040/module-01/course-02-counters-and-gauges.md
+  prompt: A gauge `queue_depth` falls from 5 to 3. What does `rate(queue_depth[1m])`
+    do with that decrease?
+  options:
+  - id: a
+    text: It treats the decrease as a counter reset and returns a number without meaning.
+    explanation: Correct. `rate` assumes only counters, so a decrease is read as a
+      reset.
+  - id: b
+    text: It returns a negative per-second change.
+    explanation: "`rate` is built for counters and does not return negative values
+      for a decrease."
+  - id: c
+    text: It returns an error, because the metric is a gauge.
+    explanation: Prometheus does not stop you from using the wrong function. The type
+      is only metadata.
+  - id: d
+    text: It returns the average of the gauge.
+    explanation: The function for an average over time is `avg_over_time`.
+  correct_option: a
+  explanation: "`rate` treats every decrease as a counter reset, so on a gauge it
+    returns a value without meaning. The type is metadata, so Prometheus does not
+    raise an error."
+- id: ats048-final-q22
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Use label matchers and know that regular expressions are anchored
+  source_readings:
+  - sections/section-040/module-02/course-01-label-matchers-and-aggregation.md
+  prompt: The counter `lab_http_requests_total` has the `path` values `/orders`, `/cart`
+    and `/search`. What does `lab_http_requests_total{path=~"/ord"}` select?
+  options:
+  - id: a
+    text: The series of `/orders` only.
+    explanation: The expression must match the whole value, and `/ord` is not the
+      whole value.
+  - id: b
+    text: Nothing, because the regular expression must match the whole label value.
+    explanation: Correct. Regular expression matchers are fully anchored.
+  - id: c
+    text: The series of all three paths.
+    explanation: Nothing in the pattern matches `/cart` or `/search`.
+  - id: d
+    text: An error, because the pattern is too short.
+    explanation: The selector is valid and returns an empty result.
+  correct_option: b
+  explanation: Regular expression matchers are fully anchored at both ends, so `/ord`
+    matches no value. `/ord.*` would match `/orders`.
+- id: ats048-final-q23
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Calculate cardinality from a label design
+  source_readings:
+  - sections/section-040/module-02/course-02-cardinality-and-series-churn.md
+  prompt: A counter has the labels `path` (3 values), `status` (4 values) and `request_id`
+    (100 values for every combination of the first two). If every combination occurs,
+    how many series does it have?
+  options:
+  - id: a
+    text: 107, the sum of the label values.
+    explanation: Labels multiply. They do not add.
+  - id: b
+    text: 12, because `request_id` is only a descriptive label.
+    explanation: Every value of `request_id` creates a new series.
+  - id: c
+    text: 1200, the product of 3, 4 and 100.
+    explanation: Correct. With independent labels the number of series is the product
+      of the label cardinalities.
+  - id: d
+    text: 300, because only `path` and `request_id` count.
+    explanation: "`status` also multiplies the count."
+  correct_option: c
+  explanation: 'With independent labels the series count is the product of the label
+    cardinalities: 3 times 4 times 100 equals 1200.'
+- id: ats048-final-q24
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Explain series churn
+  source_readings:
+  - sections/section-040/module-02/course-02-cardinality-and-series-churn.md
+  prompt: A team adds the label `version` with the application version to every metric.
+    After ten deployments memory use and the time of long queries have grown. What
+    is the cause?
+  options:
+  - id: a
+    text: Counters reset at every deployment, and Prometheus stores the reset values
+      twice.
+    explanation: Counter resets do not create series.
+  - id: b
+    text: Every new version value starts new series and leaves the old series behind,
+      which is series churn.
+    explanation: Correct. A label that changes at each deployment restarts every series
+      that carries it.
+  - id: c
+    text: "`version` is a reserved label that Prometheus stores slowly."
+    explanation: "`version` is not reserved. Only names that start with two underscores
+      are."
+  - id: d
+    text: Labels with letters and numbers need more memory than labels with numbers
+      only.
+    explanation: Memory depends on the number of series, not on the characters in
+      the value.
+  correct_option: b
+  explanation: A label whose value changes with each deployment starts new series
+    each time. This is series churn, and the old series stay in the stored blocks.
+- id: ats048-final-q25
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Write a valid sample line with quoted label values
+  source_readings:
+  - sections/section-050/module-01/course-01-text-format-lines-and-families.md
+  prompt: Which line is a valid sample in the Prometheus text format?
+  options:
+  - id: a
+    text: "`lab_jobs_total{queue=default} 3`"
+    explanation: The label value has no double quotes, so the parser rejects the line.
+  - id: b
+    text: '`lab-jobs-total{queue="default"} 3`'
+    explanation: A metric name cannot contain hyphens. Only letters, digits, underscores
+      and colons are valid.
+  - id: c
+    text: '`lab_jobs_total{queue="default"} three`'
+    explanation: The value must be a float, or NaN, +Inf or -Inf. A word is not a
+      number.
+  - id: d
+    text: '`lab_jobs_total{queue="default"} 3`'
+    explanation: Correct. The name is valid, the label value is in double quotes and
+      the value is a float.
+  correct_option: d
+  explanation: A sample line has a valid metric name, optional labels with quoted
+    values and a float value.
+- id: ats048-final-q26
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Apply the rules for the TYPE line
+  source_readings:
+  - sections/section-050/module-01/course-01-text-format-lines-and-families.md
+  prompt: Which statement about `# TYPE` lines in the text format is correct?
+  options:
+  - id: a
+    text: A metric may have several `# TYPE` lines, one before each sample.
+    explanation: A metric has at most one `# TYPE` line.
+  - id: b
+    text: The `# TYPE` line must come before the first sample of that metric, and
+      appears once.
+    explanation: Correct. Without a `# TYPE` line the type is `untyped`.
+  - id: c
+    text: The `# TYPE` line may come at the end of the page.
+    explanation: It must come before the first sample of its metric.
+  - id: d
+    text: The `# TYPE` line is required, or the page is rejected.
+    explanation: The line is optional. A metric without it is `untyped`.
+  correct_option: b
+  explanation: The `# TYPE` line is optional, appears at most once and comes before
+    the first sample.
+- id: ats048-final-q27
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Read the cumulative buckets of a histogram
+  source_readings:
+  - sections/section-050/module-01/course-02-histograms-and-summaries.md
+  prompt: A histogram page has `_bucket{le="0.1"} 600`, `_bucket{le="0.5"} 900` and
+    `_bucket{le="+Inf"} 1040`. How many observations were larger than 0.5?
+  options:
+  - id: a
+    text: '140.'
+    explanation: Correct. The `+Inf` bucket counts all 1040 observations and 900 are
+      0.5 or smaller, so 140 are larger.
+  - id: b
+    text: '900.'
+    explanation: 900 is the count of observations that are 0.5 or smaller.
+  - id: c
+    text: '300.'
+    explanation: 300 is the count between 0.1 and 0.5, not above 0.5.
+  - id: d
+    text: '1040.'
+    explanation: 1040 is the total number of observations.
+  correct_option: a
+  explanation: Buckets are cumulative, so subtract the bucket count from the total.
+- id: ats048-final-q28
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Compare histogram and summary quantiles
+  source_readings:
+  - sections/section-050/module-01/course-02-histograms-and-summaries.md
+  prompt: A service runs on five instances. You need the 99th percentile of request
+    duration for the whole service. Which choice works?
+  options:
+  - id: a
+    text: Average the `quantile="0.99"` values of five summaries.
+    explanation: An average of quantiles has no meaning.
+  - id: b
+    text: Take the largest `quantile="0.99"` value of the five summaries.
+    explanation: The largest value is not the quantile of the whole service.
+  - id: c
+    text: Add the `_bucket` series of the histograms from all instances and then run
+      `histogram_quantile`.
+    explanation: Correct. Buckets can be added across instances, and the quantile
+      is then valid for the service.
+  - id: d
+    text: Divide `_sum` by `_count` of one instance.
+    explanation: That gives an average of one instance, not a percentile.
+  correct_option: c
+  explanation: Histogram buckets can be combined across instances. Summary quantiles
+    cannot.
+- id: ats048-final-q29
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Apply the OpenMetrics end marker rule
+  source_readings:
+  - sections/section-050/module-02/course-01-openmetrics-and-negotiation.md
+  prompt: A target answers an OpenMetrics request with the content type `application/openmetrics-text`
+    and a page that is otherwise valid but has no last `# EOF` line. What is the result?
+  options:
+  - id: a
+    text: The scrape succeeds, because `# EOF` is optional.
+    explanation: It is required in OpenMetrics.
+  - id: b
+    text: The scrape fails, and `lastError` says that the data does not end with `#
+      EOF`.
+    explanation: Correct. The marker protects against a truncated page.
+  - id: c
+    text: Prometheus adds the line and continues.
+    explanation: Prometheus does not change the page.
+  - id: d
+    text: Prometheus falls back to the classic parser for this page.
+    explanation: The parser follows the content type of the response, so it does not
+      fall back.
+  correct_option: b
+  explanation: A page under the OpenMetrics content type must end with `# EOF`.
+- id: ats048-final-q30
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Explain what exemplars and native histograms need
+  source_readings:
+  - sections/section-050/module-02/course-02-histograms-exemplars-and-native-histograms.md
+  prompt: Which statement about exemplars and native histograms is correct?
+  options:
+  - id: a
+    text: Both are written in the classic text format after the `# TYPE` line.
+    explanation: The classic text format carries neither of them.
+  - id: b
+    text: Exemplars need OpenMetrics, and Prometheus keeps them only with `--enable-feature=exemplar-storage`.
+      Native histograms travel in the binary Protocol Buffers format.
+    explanation: Correct. Each feature needs a format and a setting that carry it.
+  - id: c
+    text: Native histograms are written as `_bucket` lines with a `native` label.
+    explanation: A native histogram is one series in the binary format, without `_bucket`
+      lines.
+  - id: d
+    text: Exemplars replace the `_sum` and `_count` series.
+    explanation: An exemplar is an example observation attached to a sample. It replaces
+      nothing.
+  correct_option: b
+  explanation: An exemplar needs OpenMetrics and a server flag. A native histogram
+    needs the binary format.

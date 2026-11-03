@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Aggregate A High-Cardinality Label And Select With Matchers (LAB). Graded against the live Prometheus API.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-048-lab-040-02-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
+bootstrap:
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+    - resource: deploy/crowded
+      namespace: starfleet
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: path-totals
+      description: path:lab_http_requests_total:sum has one series per path with the request id removed
+      type: file
+      source: validation/validate-path-totals.sh
+      hint: Aggregate with sum by (path). Every other label disappears.
+    - name: path-series-count
+      description: path:lab_http_requests_total:series counts the series behind each path
+      type: file
+      source: validation/validate-path-series-count.sh
+      hint: count by (path) counts the series, not the sample values.
+    - name: shop-selector
+      description: lab:shop_requests:sum adds only the /orders and /cart paths
+      type: file
+      source: validation/validate-shop-selector.sh
+      hint: Use a regular expression label matcher, =~, inside the selector.
+    - name: rules-healthy
+      description: All three rules are loaded from the rules file and healthy
+      type: file
+      source: validation/validate-rules-healthy.sh
+      hint: Put all three records in one group of rules.yaml and restart Prometheus.
+
+teardown:
+  keepCluster: false

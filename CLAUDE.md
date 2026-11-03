@@ -203,20 +203,16 @@ The course covers **Prometheus Fundamentals**, worth **20%** of
 **Prometheus Certified Associate (PCA)**. It is part of **ATP010**.
 The official objectives are listed in `astrona.yaml` and mapped in `CURRICULUM.md`.
 
-### Reading-only scope
+### Playground and graded lab scope
 
-The maintainer approved the lesson plan, asked for deeper teaching, and explicitly
-requested **no labs or playgrounds**. That instruction overrides shared examples
-about hands-on environments, graded labs and playground markers. Do not create
-runtime configurations, executable exercises or playground lifecycle markers.
-The course must be usable without a cluster or installed command-line tools.
+Each section has two modules. Each module has a landing page, three lesson parts, a `# Summary` page, one private ungraded playground and one graded lab, registered in `astrona.yaml` directly after the part it practises. Each section also has a capstone lab (`difficulty: advanced`), a `quiz.yaml` (`pass_score: 70`), and the course ends with `sections/final-domain-quiz.yaml`. All labs and playgrounds are built but untested; do not claim live verification until a real run is recorded. Labs query Prometheus through the `shuttle` pod and reload it with `kubectl -n starfleet rollout restart deployment/prometheus`.
 
 ### Teaching structure and depth
 
 Every section begins with its own introduction and measurable learning outcomes.
 Every module contains a landing page, developed teaching lessons and a final
 `# Summary` page. Put the summary after all its lessons and before the next
-module. This reading-only summary has no playground destruction marker.
+module. The summary ends with <!-- astrona:playground:destroy --> on its own line.
 
 Explain mechanisms, responsible components, realistic examples and the limits
 of each claim. Include worked reasoning and relevant failure cases. Avoid thin
@@ -226,9 +222,8 @@ self-contained-page and Mermaid rules apply throughout.
 
 ### Reusable question data
 
-Write original single-choice questions as YAML banks under section folders and
-`assessments/`. Use the versioned contract in `schemas/question-bank.schema.json`
-and teaching order in `assessments/index.yaml`. Each bank has 5–15 questions with
+Write original single-choice questions as YAML banks: `sections/section-0X0/quiz.yaml` and `sections/final-domain-quiz.yaml`. Use the versioned contract in `schemas/question-bank.schema.json`
+and teaching order in `assessments/index.yaml`. Each section bank has 13 or more questions with
 stable IDs, one correct option, per-option feedback, a measurable learning
 objective and source reading paths for author traceability.
 
@@ -248,4 +243,4 @@ The ATP registration remains draft until publication is approved.
 Primary author sources are recorded in `SOURCES.md`. The objective list was
 verified on 2026-10-11. Detailed reading expansions were written on 2026-10-11.
 Validate manifest paths, summary ordering, curriculum coverage and question
-contracts. Do not claim runtime verification for a reading-only course.
+contracts. Do not claim live verification until the actual runtime result has been recorded.

@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: exporter-metrics
+  namespace: starfleet
+data:
+  metrics.txt: |
+    # HELP lab_jobs_failed Failed jobs by reason.
+    # TYPE lab_jobs_failed counter
+    lab_jobs_failed_total{reason="timeout"} 5
+    lab_jobs_failed_total{reason="oom"} 2
+    # HELP lab_job_duration_seconds Job duration in seconds.
+    # TYPE lab_job_duration_seconds histogram
+    lab_job_duration_seconds_bucket{le="0.1"} 600
+    lab_job_duration_seconds_bucket{le="0.5"} 900
+    lab_job_duration_seconds_bucket{le="1"} 1000
+    lab_job_duration_seconds_bucket{le="+Inf"} 1040
+    lab_job_duration_seconds_sum 412.5
+    lab_job_duration_seconds_count 1040
+    # EOF

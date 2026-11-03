@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: starfleet
+data:
+  rules.yaml: |
+    groups:
+    - name: lab_labels
+      interval: 5s
+      rules:
+      - record: path:lab_http_requests_total:sum
+        expr: sum by (path) (lab_http_requests_total)
+      - record: path:lab_http_requests_total:series
+        expr: count by (path) (lab_http_requests_total)
+      - record: lab:shop_requests:sum
+        expr: sum(lab_http_requests_total{path=~"/orders|/cart"})

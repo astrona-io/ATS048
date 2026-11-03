@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Bound The Server Storage And A Crowded Target (LAB). Capstone for section 030. Graded against the Prometheus API.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-048-capstone-030
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
+bootstrap:
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+    - resource: deploy/crowded
+      namespace: starfleet
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: retention-flags
+      description: The server keeps data for 12h and caps blocks at 1GB
+      type: file
+      source: validation/validate-retention-flags.sh
+      hint: The flags are --storage.tsdb.retention.time and --storage.tsdb.retention.size in the Deployment.
+    - name: crowded-limit-config
+      description: The job crowded has a sample_limit between 1 and 199
+      type: file
+      source: validation/validate-crowded-limit-config.sh
+      hint: The limit is a setting of the scrape job in prometheus.yaml.
+    - name: crowded-rejected
+      description: The crowded target is down with a sample limit error and none of its series are stored
+      type: file
+      source: validation/validate-crowded-rejected.sh
+      hint: A scrape over the limit fails as a whole.
+    - name: server-healthy
+      description: Prometheus is ready, the probe target is up and the existing flags remain
+      type: file
+      source: validation/validate-server-healthy.sh
+      hint: Add flags to the list and keep the others.
+
+teardown:
+  keepCluster: false

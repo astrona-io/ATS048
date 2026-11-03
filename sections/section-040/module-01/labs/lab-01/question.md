@@ -1,37 +1,15 @@
----
-draft: true
-exam_objectives:
-- Data Model and Labels
----
-# Count Series By Status Label
+# Question
 
-Evaluate the required expression and preserve its labels, values and evaluation time.
+Solve this question on: `terminal`
 
-## Starting state
+The `probe` application exposes three kinds of metrics: the counter `lab_requests_total` (labels `service` and `status`), the histogram `lab_request_duration_seconds` (series `_bucket`, `_sum`, `_count`) and the gauge `lab_queue_depth`. Prometheus scrapes it and loads rule files from the ConfigMap `prometheus-rules`, key `rules.yaml`, which is empty.
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
+Add one rule group with three recording rules that use the right function for each type:
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+1. `status:lab_requests:rate1m`: the per-second request rate over one minute, one series per `status` value, with no other labels.
+2. `lab:request_duration_seconds:p95`: the 95th percentile of request duration in seconds over one minute, computed from the histogram buckets, with no labels.
+3. `lab:queue_depth:max`: the highest current value of `lab_queue_depth`, with no labels.
 
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-048-lab-040-01-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-048-lab-040-01-01" || exit 1
-node_name="astro-ats-048-lab-040-01-01-control-plane"
-worker_name="astro-ats-048-lab-040-01-01-worker"
-```
+Make Prometheus read the changed file before you submit. Do not change the scrape configuration.
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
-
-## Required result
-
-Count the two bounded status series. A request_id label would create a new series per event. Relate this result to cardinality and the difference between absent series and zero.
-
-Use the expression `count(lab_requests_total)`. The report needs `expression`, `evaluated_at` and `data`. Data is the Prometheus API data object, not only the printed value. Wait for at least twenty seconds of collected traffic before using a rate. Record evidence within five minutes of submission. Changing the expression or claiming an empty result fails.
-
-Record observations in `starfleet/evidence`, whose `report.json` contains the stated report. The verifier reads the live API again; invented values do not pass.
-
-The report object uses these fields: `expression`, `evaluated_at`, `data`. Keep numeric values numeric and preserve arrays and nested objects returned by the API.
-
-## Verify The Result
-
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+`kubectl` already points at the cluster as the cluster administrator.

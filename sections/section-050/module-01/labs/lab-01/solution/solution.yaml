@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: exporter-metrics
+  namespace: starfleet
+data:
+  metrics.txt: |
+    # HELP lab_jobs_processed_total Jobs processed by the worker, by result.
+    # TYPE lab_jobs_processed_total counter
+    lab_jobs_processed_total{queue="default",result="ok"} 1027
+    lab_jobs_processed_total{queue="default",result="error"} 13
+    # HELP lab_workers Number of running workers.
+    # TYPE lab_workers gauge
+    lab_workers 4
+    # HELP lab_queue_length Jobs waiting in the queue.
+    # TYPE lab_queue_length gauge
+    lab_queue_length 7

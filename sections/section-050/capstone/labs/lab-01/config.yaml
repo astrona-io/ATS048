@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Repair A Page With Counters, Gauges And A Histogram (LAB). Capstone for section 050. Graded against the Prometheus API.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-048-capstone-050
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
+bootstrap:
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+    - resource: deploy/exporter
+      namespace: starfleet
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: exporter-scrape-ok
+      description: The exporter target is up, so the whole page parses
+      type: file
+      source: validation/validate-exporter-scrape-ok.sh
+      hint: Read lastError in the targets API. Fix one line, then read it again, because the parser stops at the first error.
+    - name: counter-and-gauge
+      description: The counter has ok=1027 and error=13, and lab_workers is 4
+      type: file
+      source: validation/validate-counter-and-gauge.sh
+      hint: Label values need double quotes, and sample values must be numbers.
+    - name: histogram-complete
+      description: The +Inf bucket and the _count series both equal 1040
+      type: file
+      source: validation/validate-histogram-complete.sh
+      hint: The last bucket has the bound +Inf and holds every observation.
+    - name: histogram-types
+      description: The metadata API reports counter, gauge and histogram for the three families
+      type: file
+      source: validation/validate-histogram-types.sh
+      hint: Keep each TYPE line above the samples of its family.
+
+teardown:
+  keepCluster: false

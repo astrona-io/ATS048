@@ -1,89 +1,119 @@
----
-draft: true
-exam_objectives:
-- Configuration and Scraping
----
-# Measure A Scrape Configuration Solution
+# Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Solve this lab on `terminal`. Each step ends with `astrona submit`. The `--keep` flag keeps the lab running so you can continue after a failed check.
+
+Start the lab if it is not running:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-048-lab-020-01-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-048-lab-020-01-01" || exit 1
-node_name="astro-ats-048-lab-020-01-01-control-plane"
-worker_name="astro-ats-048-lab-020-01-01-worker"
+astrona run --git ssh://git@github.com/astrona-io/ATS048.git -c sections/section-020/module-01/labs/lab-01
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Submit once before you change anything. Only `self-scrape-kept` passes. The other checks fail because the probe target is wrong.
 
-## Inspect And Explain
+## Step 1: Find out why the target is down
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
-
-Inspect the current objects before changing them:
+Prometheus reports the state of every target in its targets API. Each target has a `health` value of `up` or `down`, and a `lastError` field with the reason of the last failed scrape:
 
 ```sh
-kubectl -n starfleet get pods -o wide
-kubectl get nodes -o wide
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/targets?state=active'
 ```
 
-Observe the actual duration metric; inspect the live configuration API to distinguish global defaults from per-job overrides.
+Find the target with the label `job` set to `probe`. Its `scrapeUrl` is `http://probe:8081/metrics`. The `health` value is `down` and `lastError` reports that the connection was refused. Nothing listens on port 8081.
 
-Use the expression `scrape_duration_seconds{job="probe"}`. The report needs `expression`, `evaluated_at` and `data`. Data is the Prometheus API data object, not only the printed value. Wait for at least twenty seconds of collected traffic before using a rate. Record evidence within five minutes of submission. Changing the expression or claiming an empty result fails.
-
-Record observations in `starfleet/evidence`, whose `report.json` contains the stated report. The verifier reads the live API again; invented values do not pass.
-
-
-Save this as `record.py`:
-
-```python
-import json,subprocess,time,sys,tempfile,os
-
-def call(*args):
- r=subprocess.run(list(args),text=True,capture_output=True,timeout=20)
- assert r.returncode==0, 'Observation command failed: '+args[0]
- return r.stdout.strip()
-def obj(kind,name,ns='starfleet'):
- return json.loads(call('kubectl',*(['-n',ns] if ns else []),'get',kind,name,'-o','json'))
-def api(path):
- script='import urllib.request; print(urllib.request.urlopen('+repr('http://prometheus:9090'+path)+',timeout=8).read().decode())'
- return json.loads(call('kubectl','-n','starfleet','exec','shuttle','--','python','-c',script))
-def save(data):
- resource={'apiVersion':'v1','kind':'ConfigMap','metadata':{'name':'evidence','namespace':'starfleet'},'data':{'report.json':json.dumps(data,sort_keys=True)}}
- with tempfile.NamedTemporaryFile(mode='w',suffix='.json',delete=False) as f:json.dump(resource,f);path=f.name
- try:call('kubectl','apply','-f',path)
- finally:os.unlink(path)
-
-assert call('kubectl','config','current-context') == 'kind-astro-ats-048-lab-020-01-01'
-import urllib.parse
-stamp=time.time()
-expression='scrape_duration_seconds{job="probe"}'
-answer=api('/api/v1/query?'+urllib.parse.urlencode({'query':expression,'time':stamp}))
-assert answer['status']=='success' and answer['data']['result'], 'Wait for enough scrapes'
-report={'expression':expression,'evaluated_at':stamp,'data':answer['data']}
-save(report)
-```
-
-Apply the scoped correction:
+The `up` series carries the same fact as a number. A value of 0 means the last scrape failed:
 
 ```sh
-python3 record.py
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/query?query=up'
 ```
 
-## Verify The Result
+## Step 2: Fix the target and the timing
 
-Observe the actual result. A denied request returns a nonzero status when the denial works, so run it separately from a shell sequence that stops on error. Status convergence and a successful request establish different parts of the result.
+Three changes are needed in the job `probe`. First, the target must be `probe:8080`. The scrape URL is built from the scheme (`http` by default), the address in `targets` and the `metrics_path` (`/metrics` by default).
+
+Second, `scrape_interval` and `scrape_timeout` can be set per job. A job value overrides the global value. The timeout must not be longer than the interval, otherwise Prometheus rejects the configuration. A timeout of 3 seconds in a 5 second interval is valid.
+
+Third, a target group has `targets` and an optional `labels` map. Prometheus adds these labels to every target of the group, and the target labels then end up on every series scraped from it.
+
+Save this as `prometheus-config.yaml`:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: starfleet
+data:
+  prometheus.yaml: |
+    global:
+      evaluation_interval: 2s
+      scrape_interval: 2s
+    rule_files:
+    - /rules/*.yaml
+    scrape_configs:
+    - job_name: probe
+      scrape_interval: 5s
+      scrape_timeout: 3s
+      static_configs:
+      - labels:
+          env: lab
+        targets:
+        - probe:8080
+    - job_name: prometheus
+      static_configs:
+      - targets:
+        - localhost:9090
+```
+
+Apply it:
 
 ```sh
-kubectl -n starfleet get configmaps
-kubectl -n starfleet get deployment probe -o yaml
+kubectl apply -f prometheus-config.yaml
 ```
 
-Evaluate the required expression and preserve its labels, values and evaluation time. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.
+## Step 3: Validate the file and reload
 
-After recording your result, remove the independent lab with `astrona destroy ats-048-lab-020-01-01`.
+Prometheus ships a tool that checks a configuration file without starting the server. It is called `promtool`, and it is inside the Prometheus container image. You can check the mounted file in the running pod before the new version arrives, but the ConfigMap volume updates with a delay. A restart is the most direct way to load the new file:
 
-## Common pitfalls
+```sh
+kubectl -n starfleet rollout restart deployment/prometheus
+kubectl -n starfleet rollout status deployment/prometheus
+```
 
-> [!WARNING]
-> Confirm the private context and exact node names before a change. Check the stated scope and live result. Do not change unrelated components to hide the original fault.
+If the file were invalid, the new pod would not become ready and `kubectl -n starfleet logs deployment/prometheus` would show the error.
+
+## Step 4: Check the result
+
+Wait about 15 seconds, then look at the targets again:
+
+```sh
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/targets?state=active'
+```
+
+The `probe` target now has `health` set to `up`, `scrapeInterval` of `5s` and `scrapeTimeout` of `3s`. Its labels include `env` with the value `lab`, next to `job` and `instance`. Check that the label reaches the stored series:
+
+```sh
+kubectl -n starfleet exec shuttle -- wget -qO- 'http://prometheus:9090/api/v1/query?query=lab_requests_total'
+```
+
+Every result has `env` in its `metric` object.
+
+## Step 5: Submit
+
+```sh
+astrona submit --git ssh://git@github.com/astrona-io/ATS048.git -c sections/section-020/module-01/labs/lab-01 --keep
+```
+
+Four checks must pass.
+
+## What each check proved
+
+- `probe-target-up` required an `up` series with the value 1. It proves a real scrape succeeded after the change.
+- `probe-scrape-timing` read the active targets and compared `scrapeInterval` and `scrapeTimeout`. It proves the values are set on the job and loaded.
+- `probe-env-label` queried the stored counter with a label matcher. Labels from a target group become series labels.
+- `self-scrape-kept` required the `prometheus` job to keep the global interval of 2 seconds, so a change in the global section does not pass.
+
+## If a check fails
+
+- If `probe-scrape-timing` fails and the target is up, you may have set the values in the `global` section. A global value applies to all jobs and changes the `prometheus` job as well.
+- If Prometheus does not become ready after the restart, read its log. A `scrape_timeout` that is larger than `scrape_interval` is a typical configuration error.
+- If `probe-env-label` fails right after the restart, wait one more scrape interval. The label exists only on samples collected after the new configuration loaded.

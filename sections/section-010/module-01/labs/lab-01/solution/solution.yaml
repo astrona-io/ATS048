@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: starfleet
+data:
+  rules.yaml: |
+    groups:
+    - name: lab_pipeline
+      interval: 5s
+      rules:
+      - record: job:lab_requests_total:rate1m
+        expr: sum by (job) (rate(lab_requests_total[1m]))
+      - record: job:lab_requests_errors:ratio_rate1m
+        expr: sum by (job) (rate(lab_requests_total{status="500"}[1m])) / sum by (job) (rate(lab_requests_total[1m]))

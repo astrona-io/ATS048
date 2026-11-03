@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: starfleet
+data:
+  prometheus.yaml: |
+    global:
+      evaluation_interval: 2s
+      scrape_interval: 2s
+    rule_files:
+    - /rules/*.yaml
+    scrape_configs:
+    - job_name: probe
+      static_configs:
+      - targets:
+        - probe:8081
+    - job_name: prometheus
+      static_configs:
+      - targets:
+        - localhost:9090
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: starfleet
+data:
+  rules.yaml: |
+    groups: []

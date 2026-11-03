@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Fix An OpenMetrics Page With A Histogram (LAB). Graded against the live Prometheus API.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-048-lab-050-02-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
+bootstrap:
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+    - resource: deploy/exporter
+      namespace: starfleet
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: openmetrics-scrape-ok
+      description: The exporter target is up when Prometheus negotiates OpenMetrics
+      type: file
+      source: validation/validate-openmetrics-scrape-ok.sh
+      hint: An OpenMetrics page must end with a line that contains only # EOF.
+    - name: counter-total-series
+      description: lab_jobs_failed_total has reason=timeout 5 and reason=oom 2
+      type: file
+      source: validation/validate-counter-total-series.sh
+      hint: In OpenMetrics the family name has no _total suffix and the sample has.
+    - name: histogram-complete
+      description: The histogram has a +Inf bucket equal to the count, so histogram_quantile returns a number
+      type: file
+      source: validation/validate-histogram-complete.sh
+      hint: The last bucket must be le="+Inf" and equal to the _count value of 1040.
+    - name: histogram-quantile-number
+      description: histogram_quantile(0.9, ...) over the buckets returns a finite value
+      type: file
+      source: validation/validate-histogram-quantile-number.sh
+      hint: Without the +Inf bucket the function returns NaN.
+
+teardown:
+  keepCluster: false

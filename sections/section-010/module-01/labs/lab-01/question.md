@@ -1,37 +1,14 @@
----
-draft: true
-exam_objectives:
-- System Architecture
----
-# Follow Scrape Evidence Through The Pipeline
+# Question
 
-Evaluate the required expression and preserve its labels, values and evaluation time.
+Solve this question on: `terminal`
 
-## Starting state
+Prometheus runs in the `starfleet` namespace and scrapes the `probe` application every two seconds. Prometheus already loads rule files from `/rules/*.yaml`. That directory comes from the ConfigMap `prometheus-rules`, key `rules.yaml`, which holds an empty list of groups.
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
+Add one rule group to that file with two recording rules:
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+1. `job:lab_requests_total:rate1m` records the per-second request rate over one minute, summed over all label sets of `lab_requests_total`, keeping only the `job` label.
+2. `job:lab_requests_errors:ratio_rate1m` records the share of requests that failed: the rate of `lab_requests_total` with `status="500"` divided by the rate of all `lab_requests_total`, both summed by `job`.
 
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-048-lab-010-01-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-048-lab-010-01-01" || exit 1
-node_name="astro-ats-048-lab-010-01-01-control-plane"
-worker_name="astro-ats-048-lab-010-01-01-worker"
-```
+Do not change the scrape configuration or the `probe` workload. Prometheus reads rule files at start and on reload, so make it read the changed file before you submit.
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
-
-## Required result
-
-Compare exposed counter samples with ingested series and an aggregate result. A scrape, storage, expression evaluation and rendered chart have different responsibilities.
-
-Use the expression `sum(lab_requests_total)`. The report needs `expression`, `evaluated_at` and `data`. Data is the Prometheus API data object, not only the printed value. Wait for at least twenty seconds of collected traffic before using a rate. Record evidence within five minutes of submission. Changing the expression or claiming an empty result fails.
-
-Record observations in `starfleet/evidence`, whose `report.json` contains the stated report. The verifier reads the live API again; invented values do not pass.
-
-The report object uses these fields: `expression`, `evaluated_at`, `data`. Keep numeric values numeric and preserve arrays and nested objects returned by the API.
-
-## Verify The Result
-
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+`kubectl` already points at the cluster as the cluster administrator.

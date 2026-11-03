@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Protect The Server From A High-Cardinality Target (LAB). Graded against the live Prometheus API.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-048-lab-030-02-01
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus/prometheus:v3.5.5
+      - docker.io/library/python:3.13-alpine
+
+bootstrap:
+  manifests:
+    - name: base
+      type: file
+      source: manifests/base.yaml
+    - name: lab
+      type: file
+      source: manifests/lab.yaml
+  waitFor:
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/prometheus
+      namespace: starfleet
+    - resource: deploy/traffic
+      namespace: starfleet
+    - resource: pod/shuttle
+      namespace: starfleet
+    - resource: deploy/crowded
+      namespace: starfleet
+
+testing:
+  init:
+    - name: apply-solution
+      description: Apply the reference solution
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: crowded-job-limited
+      description: The job crowded exists and has a sample_limit between 1 and 199
+      type: file
+      source: validation/validate-crowded-job-limited.sh
+      hint: Add a scrape job for crowded:8080 and set sample_limit on the job.
+    - name: crowded-scrape-rejected
+      description: The crowded target is down with a sample limit error
+      type: file
+      source: validation/validate-crowded-scrape-rejected.sh
+      hint: The target exposes 200 series, so a limit below 200 makes the whole scrape fail.
+    - name: crowded-series-not-stored
+      description: No lab_ticket_info series from the rejected scrape is stored
+      type: file
+      source: validation/validate-crowded-series-not-stored.sh
+      hint: A scrape that fails the limit is discarded completely, not truncated.
+    - name: other-targets-healthy
+      description: The probe target is still up
+      type: file
+      source: validation/validate-other-targets-healthy.sh
+      hint: The limit belongs to the crowded job only.
+
+teardown:
+  keepCluster: false
