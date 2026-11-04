@@ -31,7 +31,7 @@ sections:
   capstone:
     path: sections/section-010/capstone/labs/lab-01
     title: Repair Alerting From Rule To Webhook
-    status: draft
+    status: alpha
     runtime_verification: pending
   section_quiz: sections/section-010/quiz.yaml
   modules:
@@ -47,7 +47,7 @@ sections:
     - id: lab-01
       path: sections/section-010/module-01/labs/lab-01
       title: Record Derived Series In A Rule File
-      status: draft
+      status: alpha
       runtime_verification: pending
   - id: module-02
     title: Alerting And Extension Architecture
@@ -61,7 +61,7 @@ sections:
     - id: lab-01
       path: sections/section-010/module-02/labs/lab-01
       title: Fire An Alert And Reach Alertmanager
-      status: draft
+      status: alpha
       runtime_verification: pending
 - id: section-020
   title: Configuration and Scraping
@@ -69,7 +69,7 @@ sections:
   capstone:
     path: sections/section-020/capstone/labs/lab-01
     title: Repair Scrape Jobs And Shape The Stored Series
-    status: draft
+    status: alpha
     runtime_verification: pending
   section_quiz: sections/section-020/quiz.yaml
   modules:
@@ -85,7 +85,7 @@ sections:
     - id: lab-01
       path: sections/section-020/module-01/labs/lab-01
       title: Repair And Tune A Scrape Job
-      status: draft
+      status: alpha
       runtime_verification: pending
   - id: module-02
     title: Service Discovery And Relabeling
@@ -99,7 +99,7 @@ sections:
     - id: lab-01
       path: sections/section-020/module-02/labs/lab-01
       title: Rewrite Labels And Drop A Metric With Relabeling
-      status: draft
+      status: alpha
       runtime_verification: pending
 - id: section-030
   title: Understanding Prometheus Limitations
@@ -107,7 +107,7 @@ sections:
   capstone:
     path: sections/section-030/capstone/labs/lab-01
     title: Bound The Server Storage And A Crowded Target
-    status: draft
+    status: alpha
     runtime_verification: pending
   section_quiz: sections/section-030/quiz.yaml
   modules:
@@ -123,7 +123,7 @@ sections:
     - id: lab-01
       path: sections/section-030/module-01/labs/lab-01
       title: Set Retention And Query Limits On The Server
-      status: draft
+      status: alpha
       runtime_verification: pending
   - id: module-02
     title: What Prometheus Is Not For
@@ -137,7 +137,7 @@ sections:
     - id: lab-01
       path: sections/section-030/module-02/labs/lab-01
       title: Protect The Server From A High-Cardinality Target
-      status: draft
+      status: alpha
       runtime_verification: pending
 - id: section-040
   title: Data Model and Labels
@@ -145,7 +145,7 @@ sections:
   capstone:
     path: sections/section-040/capstone/labs/lab-01
     title: Record Rate, Aggregation And Percentile Series
-    status: draft
+    status: alpha
     runtime_verification: pending
   section_quiz: sections/section-040/quiz.yaml
   modules:
@@ -161,7 +161,7 @@ sections:
     - id: lab-01
       path: sections/section-040/module-01/labs/lab-01
       title: Choose The Right Query For Each Metric Type
-      status: draft
+      status: alpha
       runtime_verification: pending
   - id: module-02
     title: Label Design, Cardinality And Staleness
@@ -175,7 +175,7 @@ sections:
     - id: lab-01
       path: sections/section-040/module-02/labs/lab-01
       title: Aggregate A High-Cardinality Label And Select With Matchers
-      status: draft
+      status: alpha
       runtime_verification: pending
 - id: section-050
   title: Exposition Format
@@ -183,7 +183,7 @@ sections:
   capstone:
     path: sections/section-050/capstone/labs/lab-01
     title: Repair A Page With Counters, Gauges And A Histogram
-    status: draft
+    status: alpha
     runtime_verification: pending
   section_quiz: sections/section-050/quiz.yaml
   modules:
@@ -199,7 +199,7 @@ sections:
     - id: lab-01
       path: sections/section-050/module-01/labs/lab-01
       title: Repair An Invalid Text Exposition Page
-      status: draft
+      status: alpha
       runtime_verification: pending
   - id: module-02
     title: OpenMetrics, Client Libraries And Scrape Errors
@@ -213,5 +213,5 @@ sections:
     - id: lab-01
       path: sections/section-050/module-02/labs/lab-01
       title: Fix An OpenMetrics Page With A Histogram
-      status: draft
+      status: alpha
       runtime_verification: pending
