@@ -115,7 +115,7 @@ modules:
     difficulty: advanced
     estimated_duration: 45m
     topic: alerting
-    task_kind: troubleshoot
+    task_kind: troubleshooting
     tags: [prometheus, alerting, alertmanager, webhook]
     learning_goals:
     - Follow an alert through rule, Prometheus, Alertmanager and receiver
@@ -156,7 +156,7 @@ modules:
     difficulty: intermediate
     estimated_duration: 25m
     topic: configuration
-    task_kind: troubleshoot
+    task_kind: troubleshooting
     tags: [prometheus, scrape-config, up, scrape-interval]
     learning_goals:
     - Find why a target is down from the targets API
@@ -190,7 +190,7 @@ modules:
     estimated_duration: 25m
     topic: relabeling
     task_kind: build
-    tags: [prometheus, relabel_configs, metric_relabel_configs]
+    tags: [prometheus, relabel-configs, metric-relabel-configs]
     learning_goals:
     - Set a target label with relabel_configs
     - Drop a metric with metric_relabel_configs
@@ -210,7 +210,7 @@ modules:
     difficulty: advanced
     estimated_duration: 45m
     topic: configuration
-    task_kind: troubleshoot
+    task_kind: troubleshooting
     tags: [prometheus, scrape-config, relabeling]
     learning_goals:
     - Repair two failing scrape jobs from their errors
@@ -287,7 +287,7 @@ modules:
     estimated_duration: 25m
     topic: cardinality
     task_kind: build
-    tags: [prometheus, cardinality, sample_limit]
+    tags: [prometheus, cardinality, sample-limit]
     learning_goals:
     - Add a scrape job with a sample limit
     - Explain why the whole scrape is rejected
@@ -308,7 +308,7 @@ modules:
     estimated_duration: 45m
     topic: storage
     task_kind: build
-    tags: [prometheus, retention, sample_limit, cardinality]
+    tags: [prometheus, retention, sample-limit, cardinality]
     learning_goals:
     - Set retention flags without removing existing flags
     - Limit a crowded job with sample_limit
@@ -349,7 +349,7 @@ modules:
     estimated_duration: 25m
     topic: promql
     task_kind: build
-    tags: [prometheus, metric-types, rate, histogram_quantile]
+    tags: [prometheus, metric-types, rate, histogram-quantile]
     learning_goals:
     - Use rate for a counter, histogram_quantile for a histogram and the raw value for a gauge
     - Aggregate away labels that are not needed
@@ -407,7 +407,7 @@ modules:
     estimated_duration: 45m
     topic: promql
     task_kind: build
-    tags: [prometheus, recording-rule, labels, histogram_quantile]
+    tags: [prometheus, recording-rule, labels, histogram-quantile]
     learning_goals:
     - Choose the function by metric type
     - Aggregate away a high-cardinality label
@@ -447,7 +447,7 @@ modules:
     difficulty: intermediate
     estimated_duration: 25m
     topic: exposition
-    task_kind: troubleshoot
+    task_kind: troubleshooting
     tags: [prometheus, exposition-format, text-format]
     learning_goals:
     - Read the parse error of a failed scrape
@@ -480,7 +480,7 @@ modules:
     difficulty: intermediate
     estimated_duration: 25m
     topic: exposition
-    task_kind: troubleshoot
+    task_kind: troubleshooting
     tags: [prometheus, openmetrics, histogram, eof]
     learning_goals:
     - Add the required terminator line to an OpenMetrics page
@@ -501,7 +501,7 @@ modules:
     difficulty: advanced
     estimated_duration: 45m
     topic: exposition
-    task_kind: troubleshoot
+    task_kind: troubleshooting
     tags: [prometheus, exposition-format, histogram, metadata]
     learning_goals:
     - Find all faults of a failing text page
