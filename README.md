@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://astrona.io/courses/prometheus-certified-associate">
+    <img src="https://astrona.io/courses/prometheus-certified-associate/domains/ATS048.svg" alt="ATS048: Prometheus Fundamentals, part of the Prometheus Certified Associate course on Astrona" width="100%">
+  </a>
+</p>
+
 # Prometheus Fundamentals (ATS048)
 
 Prometheus Certified Associate (PCA): Prometheus Fundamentals, worth 20% of the official curriculum. This course belongs to ATP010.
